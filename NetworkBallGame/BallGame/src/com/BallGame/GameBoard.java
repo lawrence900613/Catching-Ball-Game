@@ -10,9 +10,6 @@ import javax.swing.Timer;
 
 public class GameBoard extends JPanel {
 
-    private final int DELAY = 0;
-    // private Timer timer;
-
     int gameState = 1;
     static final int GAMEPLAY = 1;
 
