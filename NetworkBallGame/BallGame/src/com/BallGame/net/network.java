@@ -103,7 +103,7 @@ public class network {
     }
     /**
      * Decodes the 32-bit string into an integer array.
-     * 0: UID: Bit 31-30. The UserID returned when connectAsClient is invoked and successfully connected.
+     * 0: UID: Bit 31-30. The UserID returned when at connection.
      * 1: unlock: Bit 25. Indicates to recipients if ball is released.
      * 2: lock: Bit 24. Indicates to recipients if ball is held.
      * 3: x: Bit 23-12. Indicates current x position of the ball.
