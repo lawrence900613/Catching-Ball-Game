@@ -16,11 +16,12 @@ public class network {
      * @return array of client-connected sockets.
      * @throws Exception 
      */
-    public static Socket[] connectAsServer(int port) throws Exception{
+    public static ArrayList<Socket> connectAsServer(int port) throws Exception{
         
         ServerSocket ssocket = new ServerSocket(port);
         ssocket.setSoTimeout(200);
-        Socket[] csockets = new Socket[MAX_CLIENTS];
+        // Socket[] csockets = new Socket[MAX_CLIENTS];
+        ArrayList<Socket> csockets = new ArrayList<Socket>(0);
         SocketListen[] listeners = new SocketListen[MAX_CLIENTS];
         
         ExecutorService es = Executors.newFixedThreadPool(MAX_CLIENTS);
@@ -37,8 +38,10 @@ public class network {
         
         for(int i = 0; i < MAX_CLIENTS; i++){
             if(SLT.get(i).isDone()){ //if connection acq'd, prep socket for return
-                csockets[i] = SLT.get(i).get();
-                csockets[i].getOutputStream().write(i); //indicate uid to client
+                // csockets[i] = SLT.get(i).get();
+                // csockets[i].getOutputStream().write(i);
+                csockets.add(SLT.get(i).get());
+                csockets.get(i).getOutputStream().write(i); //indicate uid to client
             }
             else //cancel thread
                 listeners[i].cancel();
