@@ -6,21 +6,27 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ExecutorService;
 import java.util.ArrayList;
 
-public class network {
 
-    // ServerSocket ssocket = NULL;
-    // Socket[] csockets = NULL;
+public class network {
+    private static final int MAX_CLIENTS = 3; //Should not exceed 3. See encoding scheme.
+
+    /**
+     * Listens for up to {@value #MAX_CLIENTS} connections on provided port and returns the client-connected sockets for future use.
+     * @param port port to listen on.
+     * @return array of client-connected sockets.
+     * @throws Exception 
+     */
     public static Socket[] connectAsServer(int port) throws Exception{
         
         ServerSocket ssocket = new ServerSocket(port);
         ssocket.setSoTimeout(200);
-        Socket[] csockets = new Socket[3];
-        SocketListen[] listeners = new SocketListen[3];
+        Socket[] csockets = new Socket[MAX_CLIENTS];
+        SocketListen[] listeners = new SocketListen[MAX_CLIENTS];
         
-        ExecutorService es = Executors.newFixedThreadPool(3);
-        ArrayList<FutureTask<Socket>> SLT = new ArrayList<FutureTask<Socket>>(3);
+        ExecutorService es = Executors.newFixedThreadPool(MAX_CLIENTS);
+        ArrayList<FutureTask<Socket>> SLT = new ArrayList<FutureTask<Socket>>(MAX_CLIENTS);
         // submits all listeners for async listening
-        for(int i = 0; i < 3; i++){
+        for(int i = 0; i < MAX_CLIENTS; i++){
             listeners[i] = new SocketListen(ssocket);
             SLT.set(i, new FutureTask<Socket>(listeners[i]));
             es.submit(SLT.get(i));
@@ -29,7 +35,7 @@ public class network {
         System.out.println("Waiting for players...\nPress any key to start game.");
         System.in.read();
         
-        for(int i = 0; i < 3; i++){
+        for(int i = 0; i < MAX_CLIENTS; i++){
             if(SLT.get(i).isDone()){ //if connection acq'd, prep socket for return
                 csockets[i] = SLT.get(i).get();
                 csockets[i].getOutputStream().write(i); //indicate uid to client
@@ -40,23 +46,29 @@ public class network {
         ssocket.close();
         return csockets;
     }
-
+    /**
+     * Connect to server with provided host and port.
+     * Note that on successful connection the server will return an UID through the input stream of the socket.
+     * @param host hostname of the server.
+     * @param port listening port of the server.
+     * @return socket connected to the specified server.
+     * @throws Exception 
+     */
     public static Socket connectAsClient(String host, int port) throws Exception{
         Socket socket = new Socket(host, port);
         return socket;
     }
 
 
-    /* Preliminary allocation
-     * Little endian
-     * Right
-     * bits 0-11    : y
-     * b    12-23   : x
-     * b    24      : inform lock
-     * b    25      : inform unlock
-     * b    26-29   : unused
-     * b    30-31   : UID
+    /* Preliminary encoding scheme
      * Left
+     * b    31-30   : UID
+     * b    29-26   : unused
+     * b    25      : inform unlock
+     * b    24      : inform lock
+     * b    23-12   : x
+     * bits 11-0    : y
+     * Right
      */
 
     public static int encode(int[] arr){
