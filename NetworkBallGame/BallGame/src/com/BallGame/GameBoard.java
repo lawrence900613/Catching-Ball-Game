@@ -8,13 +8,11 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.Graphics2D;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
-import java.awt.event.*;
 import java.util.Random;
 public class GameBoard extends JPanel implements MouseInputListener{
 
@@ -54,57 +52,6 @@ public class GameBoard extends JPanel implements MouseInputListener{
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        addMouseListener(new MouseListener() {
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-             }
-      
-            @Override
-            public void mousePressed(MouseEvent e) {
-            if(theCircle.contains(e.getX(), e.getY())){
-                ball.pos.x = e.getX();
-                ball.pos.y = e.getY();
-            }
-        }
-      
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if(Draggingflag){
-                    speedchangecount = 10;
-                    Random ran = new Random();
-                    int x = ran.nextInt(20 + 20) - 20;
-                    int y = ran.nextInt(20 + 20) - 20;
-                    ball.spd.x = x;
-                    ball.spd.y = y;
-                    Draggingflag = false;
-                }
-            }
-      
-            @Override
-            public void mouseEntered(MouseEvent e) { }
-      
-            @Override
-            public void mouseExited(MouseEvent e) { }
-      
-          });
-          addMouseMotionListener(new MouseMotionListener() {
-      
-            @Override
-            public void mouseDragged(MouseEvent e) {
-            if(theCircle.contains(e.getX(), e.getY())){
-                ball.pos.x = e.getX();
-                ball.pos.y = e.getY();
-                }
-                ball.spd.x = Integer.signum(ball.spd.x)*0;
-                ball.spd.y = Integer.signum(ball.spd.y)*0;
-                Draggingflag = true;
-            }
-      
-            @Override
-            public void mouseMoved(MouseEvent e) { }
-      
-          });
         if (gameState == GAMEPLAY) {
             Graphics2D g2d = (Graphics2D) g;
             theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x, 2.0 * ball.dim.y);
@@ -112,7 +59,7 @@ public class GameBoard extends JPanel implements MouseInputListener{
             g2d.fill(theCircle);
             g2d.draw(theCircle);
             // g.setColor(Color.WHITE);
-            // g.fillOval(ball.pos.x, ball.pos.y, ball.dim.x, ball.dim.y); // Oval Drawing
+            // g.fillOval(ball.pos.x, ball.pos.y, ball.dim.x, ball.dim.y); // Oval Drawing DEPRECATED
         }
     }
 
@@ -128,7 +75,15 @@ public class GameBoard extends JPanel implements MouseInputListener{
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // TODO Auto-generated method stub
+        if(Draggingflag){
+            speedchangecount = 10;
+            Random ran = new Random();
+            int x = ran.nextInt(20 + 20) - 20;
+            int y = ran.nextInt(20 + 20) - 20;
+            ball.spd.x = x;
+            ball.spd.y = y;
+            Draggingflag = false;
+        }
 
     }
 
@@ -164,8 +119,9 @@ public class GameBoard extends JPanel implements MouseInputListener{
                 y = Math.min(e.getY(), (50 * 20) - ball.dim.y);
             }
         
-            ball.spd.x = 0;
-            ball.spd.y = 0;
+            ball.spd.x = Integer.signum(ball.spd.x)*0;
+            ball.spd.y = Integer.signum(ball.spd.y)*0;
+            Draggingflag = true;
 
             ball.pos.x = x;
             ball.pos.y = y;
