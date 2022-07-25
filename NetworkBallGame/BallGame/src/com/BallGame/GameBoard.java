@@ -2,6 +2,8 @@ package com.BallGame;
 
 import java.awt.Color;
 import java.awt.Dimension;
+
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import java.awt.Graphics;
@@ -22,6 +24,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
     ArrayList<Player> playerList = new ArrayList<>();
     long catchTime = 0;
     long releaseTime = 0;
+    JLabel catchLabel; // pops up when a player grabs the ball
 
     int speedchangecount = 0;
     boolean Draggingflag = false; // check whether circle is holding
@@ -34,6 +37,9 @@ public class GameBoard extends JPanel implements MouseInputListener {
     public GameBoard() {
         this.dummyPlayer = new Player("Dummy Player");
         playerList.add(dummyPlayer);
+        catchLabel = new JLabel();
+        catchLabel.setForeground(Color.white);
+        add(catchLabel);
 
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
@@ -75,17 +81,24 @@ public class GameBoard extends JPanel implements MouseInputListener {
         }
     }
 
+    public void handleBallCatched() {
+        catchTime = System.currentTimeMillis();
+        catchLabel.setText(dummyPlayer.username + " has grabbed the ball!");
+        Dimension size = catchLabel.getPreferredSize();
+        catchLabel.setBounds(650, 100, size.width, size.height);
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
         if (theCircle.contains(e.getX(), e.getY())) {
-            catchTime = System.currentTimeMillis();
+            handleBallCatched();
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (theCircle.contains(e.getX(), e.getY())) {
-            catchTime = System.currentTimeMillis();
+            handleBallCatched();
         }
     }
 
@@ -102,6 +115,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
             releaseTime = System.currentTimeMillis();
             dummyPlayer.score += (releaseTime - catchTime);
             System.out.println("Score = " + dummyPlayer.score);
+            catchLabel.setText("");
 
             Draggingflag = false;
         }
