@@ -13,10 +13,13 @@ import java.awt.geom.Ellipse2D;
 import java.awt.Graphics2D;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
+
+import java.util.ArrayList;
 import java.util.Random;
 
 public class GameBoard extends JPanel implements MouseInputListener {
-
+    Player dummyPlayer;
+    ArrayList<Player> playerList = new ArrayList<>();
     long catchTime = 0;
     long releaseTime = 0;
 
@@ -29,6 +32,9 @@ public class GameBoard extends JPanel implements MouseInputListener {
     Ball ball = new Ball();
 
     public GameBoard() {
+        this.dummyPlayer = new Player("Dummy Player");
+        playerList.add(dummyPlayer);
+
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         setPreferredSize(new Dimension(50 * 30, 50 * 20));
@@ -71,14 +77,14 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
+        if (theCircle.contains(e.getX(), e.getY())) {
+            catchTime = System.currentTimeMillis();
+        }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // TODO Auto-generated method stub
         if (theCircle.contains(e.getX(), e.getY())) {
-            System.out.println("mouse pressed at " + System.currentTimeMillis());
             catchTime = System.currentTimeMillis();
         }
     }
@@ -92,14 +98,13 @@ public class GameBoard extends JPanel implements MouseInputListener {
             int y = ran.nextInt(20 + 20) - 20;
             ball.spd.x = x;
             ball.spd.y = y;
+
+            releaseTime = System.currentTimeMillis();
+            dummyPlayer.score += (releaseTime - catchTime);
+            System.out.println("Score = " + dummyPlayer.score);
+
             Draggingflag = false;
         }
-        if (theCircle.contains(e.getX(), e.getY())) {
-            System.out.println("mouse released at " + System.currentTimeMillis());
-            releaseTime = System.currentTimeMillis();
-            System.out.println("Score = " + ((releaseTime - catchTime) / 1000));
-        }
-
     }
 
     @Override
