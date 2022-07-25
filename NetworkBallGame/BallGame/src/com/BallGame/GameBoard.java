@@ -14,10 +14,14 @@ import java.awt.Graphics2D;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
 import java.util.Random;
-public class GameBoard extends JPanel implements MouseInputListener{
+
+public class GameBoard extends JPanel implements MouseInputListener {
+
+    long catchTime = 0;
+    long releaseTime = 0;
 
     int speedchangecount = 0;
-    boolean Draggingflag = false; //check whether circle is holding
+    boolean Draggingflag = false; // check whether circle is holding
 
     int gameState = 1;
     static final int GAMEPLAY = 1;
@@ -31,13 +35,13 @@ public class GameBoard extends JPanel implements MouseInputListener{
         setLayout(null);
         setBackground(Color.BLACK);
         Timer timer = new Timer(5, new ActionListener() {
-            
+
             public void actionPerformed(ActionEvent e) {
-                if(speedchangecount == 0 && !Draggingflag){
-                    ball.spd.x = Integer.signum(ball.spd.x)*5;
-                    ball.spd.y = Integer.signum(ball.spd.y)*5;
-                }else{
-                    speedchangecount --;
+                if (speedchangecount == 0 && !Draggingflag) {
+                    ball.spd.x = Integer.signum(ball.spd.x) * 5;
+                    ball.spd.y = Integer.signum(ball.spd.y) * 5;
+                } else {
+                    speedchangecount--;
                 }
                 ball.move();
                 ball.wallDetection();
@@ -54,12 +58,14 @@ public class GameBoard extends JPanel implements MouseInputListener{
         super.paintComponent(g);
         if (gameState == GAMEPLAY) {
             Graphics2D g2d = (Graphics2D) g;
-            theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x, 2.0 * ball.dim.y);
+            theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x,
+                    2.0 * ball.dim.y);
             g2d.setColor(Color.white);
             g2d.fill(theCircle);
             g2d.draw(theCircle);
             // g.setColor(Color.WHITE);
-            // g.fillOval(ball.pos.x, ball.pos.y, ball.dim.x, ball.dim.y); // Oval Drawing DEPRECATED
+            // g.fillOval(ball.pos.x, ball.pos.y, ball.dim.x, ball.dim.y); // Oval Drawing
+            // DEPRECATED
         }
     }
 
@@ -67,15 +73,19 @@ public class GameBoard extends JPanel implements MouseInputListener{
     public void mouseClicked(MouseEvent e) {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public void mousePressed(MouseEvent e) {
         // TODO Auto-generated method stub
+        if (theCircle.contains(e.getX(), e.getY())) {
+            System.out.println("mouse pressed at " + System.currentTimeMillis());
+            catchTime = System.currentTimeMillis();
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if(Draggingflag){
+        if (Draggingflag) {
             speedchangecount = 10;
             Random ran = new Random();
             int x = ran.nextInt(20 + 20) - 20;
@@ -83,6 +93,11 @@ public class GameBoard extends JPanel implements MouseInputListener{
             ball.spd.x = x;
             ball.spd.y = y;
             Draggingflag = false;
+        }
+        if (theCircle.contains(e.getX(), e.getY())) {
+            System.out.println("mouse released at " + System.currentTimeMillis());
+            releaseTime = System.currentTimeMillis();
+            System.out.println("Score = " + ((releaseTime - catchTime) / 1000));
         }
 
     }
@@ -103,31 +118,29 @@ public class GameBoard extends JPanel implements MouseInputListener{
     public void mouseDragged(MouseEvent e) {
 
         int x, y;
-        if(theCircle.contains(e.getX(), e.getY())){
+        if (theCircle.contains(e.getX(), e.getY())) {
 
-            if(e.getX() < 50){
+            if (e.getX() < 50) {
                 x = Math.max(e.getX(), 0 + ball.dim.x);
-            }
-            else{
+            } else {
                 x = Math.min(e.getX(), (50 * 30) - ball.dim.x);
             }
 
-            if(e.getY() < 50){
+            if (e.getY() < 50) {
                 y = Math.max(e.getY(), 0 + ball.dim.y);
-            }
-            else{
+            } else {
                 y = Math.min(e.getY(), (50 * 20) - ball.dim.y);
             }
-        
-            ball.spd.x = Integer.signum(ball.spd.x)*0;
-            ball.spd.y = Integer.signum(ball.spd.y)*0;
+
+            ball.spd.x = Integer.signum(ball.spd.x) * 0;
+            ball.spd.y = Integer.signum(ball.spd.y) * 0;
             Draggingflag = true;
 
             ball.pos.x = x;
             ball.pos.y = y;
 
         }
-        
+
     }
 
     @Override
