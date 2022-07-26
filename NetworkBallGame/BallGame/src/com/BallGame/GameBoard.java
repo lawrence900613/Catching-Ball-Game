@@ -18,6 +18,8 @@ import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 public class GameBoard extends JPanel implements MouseInputListener {
@@ -38,7 +40,13 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
     public GameBoard() {
         this.dummyPlayer = new Player("Dummy Player");
+        Player janice = new Player("Janice");
+        Player arthur = new Player("Arthur");
+        janice.score = 1540;
+        arthur.score = 250;
         playerList.add(dummyPlayer);
+        playerList.add(janice);
+        playerList.add(arthur);
         catchLabel = new JLabel();
         catchLabel.setForeground(Color.white);
         add(catchLabel);
@@ -89,7 +97,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
         leaderboardPanel = new JPanel();
         leaderboardPanel.setBackground(Color.black);
         leaderboardPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-        
+
         JLabel leaderboardTitle = new JLabel("Leaderboard");
         leaderboardTitle.setForeground(Color.white);
         leaderboardPanel.add(leaderboardTitle);
@@ -104,6 +112,33 @@ public class GameBoard extends JPanel implements MouseInputListener {
         catchLabel.setText(dummyPlayer.username + " has grabbed the ball!");
         Dimension size = catchLabel.getPreferredSize();
         catchLabel.setBounds(650, 100, size.width, size.height);
+    }
+
+    public void updateScore() {
+        catchLabel.setText("");
+        releaseTime = System.currentTimeMillis();
+
+        // update player score
+        dummyPlayer.score += (releaseTime - catchTime);
+        System.out.println("Score = " + dummyPlayer.score);
+
+        // sort scores from highest to lowest
+        Collections.sort(playerList, new Comparator<Player>() {
+            @Override
+            public int compare(Player p1, Player p2) {
+                if (p1.score == p2.score)
+                    return 0;
+                else if (p1.score > p2.score)
+                    return -1;
+                else
+                    return 1;
+            }
+        });
+
+        // update leaderboard
+        for (Player player : playerList) {
+            System.out.println(player.score);
+        }
     }
 
     @Override
@@ -130,10 +165,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
             ball.spd.x = x;
             ball.spd.y = y;
 
-            releaseTime = System.currentTimeMillis();
-            dummyPlayer.score += (releaseTime - catchTime);
-            System.out.println("Score = " + dummyPlayer.score);
-            catchLabel.setText("");
+            updateScore();
 
             Draggingflag = false;
         }
