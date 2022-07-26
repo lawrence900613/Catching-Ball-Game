@@ -38,7 +38,6 @@ public class network {
         
         ServerSocket ssocket = new ServerSocket(port);
         ssocket.setSoTimeout(200);
-        // Socket[] csockets = new Socket[MAX_CLIENTS];
         ArrayList<Socket> csockets = new ArrayList<Socket>(MAX_CLIENTS);
         SocketListen[] listeners = new SocketListen[MAX_CLIENTS];
         
