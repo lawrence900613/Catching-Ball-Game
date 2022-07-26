@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -22,6 +23,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
+
+import java.awt.Robot;
+import java.awt.event.InputEvent;
+import java.awt.AWTException;
 
 public class GameBoard extends JPanel implements MouseInputListener {
     Player dummyPlayer;
@@ -41,9 +46,9 @@ public class GameBoard extends JPanel implements MouseInputListener {
     Ball ball = new Ball();
 
     public GameBoard() {
-        this.dummyPlayer = new Player("Dummy Player");
-        Player janice = new Player("Janice");
-        Player arthur = new Player("Arthur");
+        this.dummyPlayer = new Player("Dummy Player", Color.RED);
+        Player janice = new Player("Janice", Color.BLUE);
+        Player arthur = new Player("Arthur", Color.GREEN);
         janice.score = 1540;
         arthur.score = 250;
         playerList.add(dummyPlayer);
@@ -60,7 +65,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
         setPreferredSize(new Dimension(50 * 30, 50 * 20));
         setLayout(null);
         setBackground(Color.BLACK);
-        Timer timer = new Timer(5, new ActionListener() {
+        Timer timer = new Timer(0, new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 if (speedchangecount == 0 && !Draggingflag) {
@@ -71,6 +76,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
                 }
                 ball.move();
                 ball.wallDetection();
+                lockCheck();
                 repaint();
             }
 
@@ -86,7 +92,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
             Graphics2D g2d = (Graphics2D) g;
             theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x,
                     2.0 * ball.dim.y);
-            g2d.setColor(Color.white);
+            g2d.setColor(ball.color);
             g2d.fill(theCircle);
             g2d.draw(theCircle);
             // g.setColor(Color.WHITE);
@@ -167,6 +173,18 @@ public class GameBoard extends JPanel implements MouseInputListener {
         catchLabel.setBounds(650, 100, size.width, size.height);
     }
 
+    public void lockCheck() {
+        if (Draggingflag && (ball.lockStart - ball.lockDuration) > System.currentTimeMillis()) {
+            Draggingflag = false;
+            try {
+                Robot bot = new Robot();
+                bot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+            } catch (AWTException e) {
+                System.out.println("Error");
+            }
+        }
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
         // if (theCircle.contains(e.getX(), e.getY())) {
@@ -179,6 +197,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
         if (theCircle.contains(e.getX(), e.getY())) {
             handleBallCatched();
             Draggingflag = true;
+            ball.color = dummyPlayer.teamname;
+            ball.lockStart = System.currentTimeMillis();
         }
     }
 
@@ -191,10 +211,10 @@ public class GameBoard extends JPanel implements MouseInputListener {
             int y = ran.nextInt(20 + 20) - 20;
             ball.spd.x = x;
             ball.spd.y = y;
-
             updateScore();
-
             Draggingflag = false;
+            ball.lockStart = -ball.lockDuration;
+            ball.color = Color.WHITE;
         } else if (theCircle.contains(e.getX(), e.getY())) {
             updateScore();
         }

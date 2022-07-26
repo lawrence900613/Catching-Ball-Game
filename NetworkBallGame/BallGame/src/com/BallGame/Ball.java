@@ -1,17 +1,22 @@
 package com.BallGame;
 
 import java.awt.Point;
+import java.awt.Color;
 
 public class Ball {
 
    Point pos;
    Point dim;
    Point spd;
+   Color color;
+   double lockDuration = 5000;
+   double lockStart = -lockDuration;
 
    public Ball() {
       this.pos = new Point((50 * 30) / 2, (50 * 20) / 2);
-      this.dim = new Point(10, 10);
-      this.spd = new Point(5, 5);
+      this.dim = new Point(50, 50);
+      this.spd = new Point(0, 0);
+      this.color = Color.WHITE;
    }
 
    public void move() {
