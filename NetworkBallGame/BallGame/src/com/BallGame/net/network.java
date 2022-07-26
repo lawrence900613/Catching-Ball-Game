@@ -56,8 +56,6 @@ public class network {
         
         for(int i = 0; i < MAX_CLIENTS; i++){
             if(SLT.get(i).isDone()){ //if connection acq'd, prep socket for return
-                // csockets[i] = SLT.get(i).get();
-                // csockets[i].getOutputStream().write(i);
                 csockets.add(SLT.get(i).get());
                 csockets.get(i).getOutputStream().write(i); //indicate uid to client
             }
@@ -138,27 +136,5 @@ public class network {
         info[3] = (info_en & 0x00FFF000) >>> 12;
         info[4] = (info_en & 0x00000FFF);
         return info;
-    }
-
-    public static void testServer(){
-        // System.out.println(Integer.toBinaryString(network.encode(3, true, true, 3840, 2160)));
-        // for (int i : network.decode(network.encode(3, true, true, 3840, 2160))) {
-        //     System.out.print(i + " ");
-        // }
-        try {
-            for (Socket s : connectAsServer(6969)) {
-                s.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-    }
-    public static void testClient(){
-        try {
-            System.out.println(connectAsClient("localhost", 6969).getUID());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
