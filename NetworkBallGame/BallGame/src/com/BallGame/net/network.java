@@ -9,6 +9,25 @@ import java.util.ArrayList;
 public class network {
     private static final int MAX_CLIENTS = 3; //Should not exceed 3. See encoding scheme.
 
+    /**  
+     * Encapsulement for return values of connectAsClient as a tuple of [Socket, Int].
+     */
+    public static class ClientResponse{
+        Socket s;
+        int uid;
+        protected ClientResponse(Socket s, int uid){
+            this.s = s;
+            this.uid = uid;
+        }
+        /**
+         * @return Socket connected to server.
+          */
+        public Socket getSocket(){ return s; }
+        /**
+         * @return UID assigned by the server.
+          */
+        public int getUID(){ return uid; }
+    }
     /**
      * Listens for up to {@value #MAX_CLIENTS} connections on provided port and returns the client-connected sockets for future use.
      * @param port port to listen on.
@@ -50,15 +69,15 @@ public class network {
     }
     /**
      * Connect to server with provided host and port.
-     * Note that on successful connection the server will return an UID through the input stream of the socket.
      * @param host hostname of the server.
      * @param port listening port of the server.
-     * @return socket connected to the specified server.
+     * @return ClientResponse containing the connected socket and UID assigned.
      * @throws Exception 
      */
-    public static Socket connectAsClient(String host, int port) throws Exception{
+    public static ClientResponse connectAsClient(String host, int port) throws Exception{
         Socket socket = new Socket(host, port);
-        return socket;
+        int uid = socket.getInputStream().read();
+        return new ClientResponse(socket, uid);
     }
 
 
@@ -137,7 +156,7 @@ public class network {
     }
     public static void testClient(){
         try {
-            System.out.println(connectAsClient("localhost", 6969).getInputStream().read());
+            System.out.println(connectAsClient("localhost", 6969).getUID());
         } catch (Exception e) {
             e.printStackTrace();
         }
