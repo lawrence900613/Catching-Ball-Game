@@ -2,9 +2,10 @@ package com.BallGame;
 
 import javax.swing.JFrame;
 
-public class GameWindow {
 
-    private static void initWindow() {
+public class GameWindow{
+
+    public static void initWindow(){
         JFrame window = new JFrame("Ball Game");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -19,7 +20,9 @@ public class GameWindow {
 
     }
 
+    
     public static void main(String[] args) {
         initWindow();
     }
+
 }
