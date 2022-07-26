@@ -3,6 +3,7 @@ package com.BallGame;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -25,6 +26,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
     long catchTime = 0;
     long releaseTime = 0;
     JLabel catchLabel; // pops up when a player grabs the ball
+    JPanel leaderboardPanel;
 
     int speedchangecount = 0;
     boolean Draggingflag = false; // check whether circle is holding
@@ -40,6 +42,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
         catchLabel = new JLabel();
         catchLabel.setForeground(Color.white);
         add(catchLabel);
+
+        setUpLeaderboard();
 
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
@@ -79,6 +83,20 @@ public class GameBoard extends JPanel implements MouseInputListener {
             // g.fillOval(ball.pos.x, ball.pos.y, ball.dim.x, ball.dim.y); // Oval Drawing
             // DEPRECATED
         }
+    }
+
+    public void setUpLeaderboard() {
+        leaderboardPanel = new JPanel();
+        leaderboardPanel.setBackground(Color.black);
+        leaderboardPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+        
+        JLabel leaderboardTitle = new JLabel("Leaderboard");
+        leaderboardTitle.setForeground(Color.white);
+        leaderboardPanel.add(leaderboardTitle);
+
+        Dimension size = leaderboardPanel.getPreferredSize();
+        leaderboardPanel.setBounds(1250, 50, size.width, size.height);
+        add(leaderboardPanel);
     }
 
     public void handleBallCatched() {
