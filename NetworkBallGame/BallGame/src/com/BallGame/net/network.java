@@ -6,7 +6,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ExecutorService;
 import java.util.ArrayList;
 
-
 public class network {
     private static final int MAX_CLIENTS = 3; //Should not exceed 3. See encoding scheme.
 
@@ -29,7 +28,7 @@ public class network {
         // submits all listeners for async listening
         for(int i = 0; i < MAX_CLIENTS; i++){
             listeners[i] = new SocketListen(ssocket);
-            SLT.set(i, new FutureTask<Socket>(listeners[i]));
+            SLT.add(new FutureTask<Socket>(listeners[i]));
             es.submit(SLT.get(i));
         }
         
@@ -114,11 +113,33 @@ public class network {
      */
     public static int[] decode(int info_en){
         int[] info = new int[5];
-        info[0] = (info_en & 0xC0000000) >> 30;
-        info[1] = (info_en & 0x02000000) >> 25;
-        info[2] = (info_en & 0x01000000) >> 24;
-        info[3] = (info_en & 0x00FFF000) >> 12;
+        info[0] = (info_en & 0xC0000000) >>> 30;
+        info[1] = (info_en & 0x02000000) >>> 25;
+        info[2] = (info_en & 0x01000000) >>> 24;
+        info[3] = (info_en & 0x00FFF000) >>> 12;
         info[4] = (info_en & 0x00000FFF);
         return info;
+    }
+
+    public static void testServer(){
+        // System.out.println(Integer.toBinaryString(network.encode(3, true, true, 3840, 2160)));
+        // for (int i : network.decode(network.encode(3, true, true, 3840, 2160))) {
+        //     System.out.print(i + " ");
+        // }
+        try {
+            for (Socket s : connectAsServer(6969)) {
+                s.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+    }
+    public static void testClient(){
+        try {
+            System.out.println(connectAsClient("localhost", 6969).getInputStream().read());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
