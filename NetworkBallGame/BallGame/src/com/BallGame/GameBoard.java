@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -29,6 +30,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
     long releaseTime = 0;
     JLabel catchLabel; // pops up when a player grabs the ball
     JPanel leaderboardPanel;
+    JPanel scorePanel;
 
     int speedchangecount = 0;
     boolean Draggingflag = false; // check whether circle is holding
@@ -97,31 +99,41 @@ public class GameBoard extends JPanel implements MouseInputListener {
         leaderboardPanel = new JPanel();
         leaderboardPanel.setBackground(Color.black);
         leaderboardPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+        leaderboardPanel.setLayout(new BoxLayout(leaderboardPanel, BoxLayout.Y_AXIS));
 
         JLabel leaderboardTitle = new JLabel("Leaderboard");
         leaderboardTitle.setForeground(Color.white);
         leaderboardPanel.add(leaderboardTitle);
 
+        // nested panel for scores
+        scorePanel = new JPanel();
+        scorePanel.setBackground(Color.black);
+        scorePanel.setLayout(new BoxLayout(scorePanel, BoxLayout.Y_AXIS));
+
+        sortPlayers();
+        renderScores();
+        leaderboardPanel.add(scorePanel);
+
         Dimension size = leaderboardPanel.getPreferredSize();
         leaderboardPanel.setBounds(1250, 50, size.width, size.height);
         add(leaderboardPanel);
+
     }
 
-    public void handleBallCatched() {
-        catchTime = System.currentTimeMillis();
-        catchLabel.setText(dummyPlayer.username + " has grabbed the ball!");
-        Dimension size = catchLabel.getPreferredSize();
-        catchLabel.setBounds(650, 100, size.width, size.height);
+    public void renderScores() {
+        scorePanel.removeAll();
+        for (Player player : playerList) {
+            JLabel scoreLabel = new JLabel(player.username + ": " + player.score);
+            scoreLabel.setForeground(Color.white);
+            scorePanel.add(scoreLabel);
+        }
+
+        Dimension size = leaderboardPanel.getPreferredSize();
+        leaderboardPanel.setBounds(1250, 50, size.width, size.height);
+
     }
 
-    public void updateScore() {
-        catchLabel.setText("");
-        releaseTime = System.currentTimeMillis();
-
-        // update player score
-        dummyPlayer.score += (releaseTime - catchTime);
-        System.out.println("Score = " + dummyPlayer.score);
-
+    public void sortPlayers() {
         // sort scores from highest to lowest
         Collections.sort(playerList, new Comparator<Player>() {
             @Override
@@ -134,11 +146,29 @@ public class GameBoard extends JPanel implements MouseInputListener {
                     return 1;
             }
         });
+    }
+
+    public void updateScore() {
+        catchLabel.setText("");
+        releaseTime = System.currentTimeMillis();
+
+        // update player score
+        dummyPlayer.score += (releaseTime - catchTime);
+        System.out.println("Score = " + dummyPlayer.score);
 
         // update leaderboard
+        sortPlayers();
+        renderScores();
         for (Player player : playerList) {
             System.out.println(player.score);
         }
+    }
+
+    public void handleBallCatched() {
+        catchTime = System.currentTimeMillis();
+        catchLabel.setText(dummyPlayer.username + " has grabbed the ball!");
+        Dimension size = catchLabel.getPreferredSize();
+        catchLabel.setBounds(650, 100, size.width, size.height);
     }
 
     @Override
