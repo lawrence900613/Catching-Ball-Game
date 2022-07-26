@@ -154,14 +154,10 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
         // update player score
         dummyPlayer.score += (releaseTime - catchTime);
-        System.out.println("Score = " + dummyPlayer.score);
 
         // update leaderboard
         sortPlayers();
         renderScores();
-        for (Player player : playerList) {
-            System.out.println(player.score);
-        }
     }
 
     public void handleBallCatched() {
@@ -198,6 +194,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
             updateScore();
 
             Draggingflag = false;
+        } else if (theCircle.contains(e.getX(), e.getY())) {
+            updateScore();
         }
     }
 
