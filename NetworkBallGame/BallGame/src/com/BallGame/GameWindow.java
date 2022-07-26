@@ -11,6 +11,8 @@ public class GameWindow {
         GameBoard board = new GameBoard();
 
         window.add(board);
+        window.addMouseMotionListener(board);
+        window.addMouseListener(board);
         window.setResizable(false);
         window.pack();
         window.setLocationRelativeTo(null);

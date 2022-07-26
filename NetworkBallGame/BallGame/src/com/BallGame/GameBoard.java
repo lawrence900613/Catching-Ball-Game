@@ -169,15 +169,16 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (theCircle.contains(e.getX(), e.getY())) {
-            handleBallCatched();
-        }
+        // if (theCircle.contains(e.getX(), e.getY())) {
+        // handleBallCatched();
+        // }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (theCircle.contains(e.getX(), e.getY())) {
             handleBallCatched();
+            Draggingflag = true;
         }
     }
 
@@ -215,7 +216,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
     public void mouseDragged(MouseEvent e) {
 
         int x, y;
-        if (theCircle.contains(e.getX(), e.getY())) {
+        // if (theCircle.contains(e.getX(), e.getY())) {
+        if (Draggingflag) {
 
             if (e.getX() < 50) {
                 x = Math.max(e.getX(), 0 + ball.dim.x);
@@ -231,8 +233,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
             ball.spd.x = Integer.signum(ball.spd.x) * 0;
             ball.spd.y = Integer.signum(ball.spd.y) * 0;
-            Draggingflag = true;
-
+            // Draggingflag = true;
             ball.pos.x = x;
             ball.pos.y = y;
 
