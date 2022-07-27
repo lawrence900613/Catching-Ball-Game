@@ -215,8 +215,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
         if (Draggingflag) {
             speedchangecount = 10;
             Random ran = new Random();
-            int x = ran.nextInt(50 + 50) - 20;
-            int y = ran.nextInt(50 + 50) - 20;
+            int x = ran.nextInt(20 + 20) - 20;
+            int y = ran.nextInt(20 + 20) - 20;
             ball.spd.x = x;
             ball.spd.y = y;
             updateScore();
