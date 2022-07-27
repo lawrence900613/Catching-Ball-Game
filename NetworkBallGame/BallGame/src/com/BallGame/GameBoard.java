@@ -45,6 +45,10 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
     Ball ball = new Ball();
 
+    long startTime;
+
+    long estimatedTime;
+
     public GameBoard() {
         this.dummyPlayer = new Player("Dummy Player", Color.RED);
         Player janice = new Player("Janice", Color.BLUE);
@@ -65,9 +69,13 @@ public class GameBoard extends JPanel implements MouseInputListener {
         setPreferredSize(new Dimension(50 * 30, 50 * 20));
         setLayout(null);
         setBackground(Color.BLACK);
+
         Timer timer = new Timer(0, new ActionListener() {
+            int i = 0;
 
             public void actionPerformed(ActionEvent e) {
+                startTime = System.nanoTime();
+                lockCheck();
                 if (speedchangecount == 0 && !Draggingflag) {
                     ball.spd.x = Integer.signum(ball.spd.x) * 5;
                     ball.spd.y = Integer.signum(ball.spd.y) * 5;
@@ -76,8 +84,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
                 }
                 ball.move();
                 ball.wallDetection();
-                lockCheck();
                 repaint();
+                i++;
             }
 
         });
@@ -174,8 +182,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
     }
 
     public void lockCheck() {
-        if (Draggingflag && (ball.lockStart - ball.lockDuration) > System.currentTimeMillis()) {
-            Draggingflag = false;
+        if (Draggingflag && (startTime > estimatedTime)) {
             try {
                 Robot bot = new Robot();
                 bot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
@@ -199,6 +206,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
             Draggingflag = true;
             ball.color = dummyPlayer.teamname;
             ball.lockStart = System.currentTimeMillis();
+            startTime = System.nanoTime();
+            estimatedTime = startTime + 100000 * 10000;
         }
     }
 
@@ -250,10 +259,9 @@ public class GameBoard extends JPanel implements MouseInputListener {
             } else {
                 y = Math.min(e.getY(), (50 * 20) - ball.dim.y);
             }
-
+            startTime = System.nanoTime();
             ball.spd.x = Integer.signum(ball.spd.x) * 0;
             ball.spd.y = Integer.signum(ball.spd.y) * 0;
-            // Draggingflag = true;
             ball.pos.x = x;
             ball.pos.y = y;
 
