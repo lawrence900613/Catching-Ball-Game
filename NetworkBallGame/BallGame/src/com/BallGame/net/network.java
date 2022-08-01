@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.ArrayList;
 
 public class network {
-    private static final int MAX_CLIENTS = 3; //Should not exceed 3. See encoding scheme.
+    public static final int MAX_CLIENTS = 3; //Should not exceed 3. See encoding scheme.
 
     /**  
      * Encapsulement for return values of connectAsClient as a tuple of [Socket, Int].
@@ -62,6 +62,7 @@ public class network {
                 listeners[i].cancel();
         }
         ssocket.close();
+        es.shutdown();
         return csockets;
     }
     /**
@@ -77,7 +78,9 @@ public class network {
         return new ClientResponse(socket, uid);
     }
 
+    public static void asyncListen(){
 
+    }
     /* Preliminary encoding scheme
      * Left
      * b    31-30   : UID
