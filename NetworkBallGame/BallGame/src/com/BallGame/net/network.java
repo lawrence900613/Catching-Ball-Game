@@ -59,7 +59,7 @@ public class network {
                 csockets.get(i).getOutputStream().write(i); //indicate uid to client
             }
             else //cancel thread
-                listeners[i].cancel();
+                listeners[i].stop();
         }
         ssocket.close();
         es.shutdown();
@@ -78,9 +78,6 @@ public class network {
         return new ClientResponse(socket, uid);
     }
 
-    public static void asyncListen(){
-
-    }
     /* Preliminary encoding scheme
      * Left
      * b    31-30   : UID
