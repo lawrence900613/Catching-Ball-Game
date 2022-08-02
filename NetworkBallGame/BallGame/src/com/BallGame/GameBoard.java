@@ -5,8 +5,10 @@ import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import java.awt.Font;
 
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -40,7 +42,8 @@ public class GameBoard extends JPanel implements MouseInputListener {
     boolean Draggingflag = false; // check whether circle is holding
 
     int gameState = 1;
-    static final int GAMEPLAY = 1;
+    static final int MENU = 1;
+    static final int GAMEPLAY = 2;
 
     Ball ball = new Ball();
 
@@ -62,6 +65,12 @@ public class GameBoard extends JPanel implements MouseInputListener {
         add(catchLabel);
 
         setUpLeaderboard();
+        JButton startButton = new JButton("Start");
+        startButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        startButton.setBackground(Color.BLACK);
+        startButton.setForeground(Color.WHITE);
+        startButton.setBounds(50 * 30 / 2 - 50, 50 * 20 / 2 - 25, 100, 50);
+        this.add(startButton);
 
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
@@ -70,9 +79,15 @@ public class GameBoard extends JPanel implements MouseInputListener {
         setBackground(Color.BLACK);
 
         Timer timer = new Timer(0, new ActionListener() {
-            int i = 0;
 
             public void actionPerformed(ActionEvent e) {
+                startButton.addActionListener(this);
+                if (e.getSource() == startButton) {
+                    gameState = GAMEPLAY;
+                    leaderboardPanel.setVisible(true);
+                    startButton.setVisible(false);
+                    startButton.setFocusable(false);
+                }
                 startTime = System.nanoTime();
                 lockCheck();
                 if (speedchangecount == 0 && !Draggingflag) {
@@ -84,7 +99,6 @@ public class GameBoard extends JPanel implements MouseInputListener {
                 ball.move();
                 ball.wallDetection();
                 repaint();
-                i++;
             }
 
         });
@@ -92,11 +106,12 @@ public class GameBoard extends JPanel implements MouseInputListener {
     }
 
     Shape theCircle;
+    Shape startButton;
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
         if (gameState == GAMEPLAY) {
-            Graphics2D g2d = (Graphics2D) g;
             theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x,
                     2.0 * ball.dim.y);
             g2d.setColor(ball.color);
@@ -129,7 +144,10 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
         Dimension size = leaderboardPanel.getPreferredSize();
         leaderboardPanel.setBounds(1250, 50, size.width, size.height);
-        add(leaderboardPanel);
+        this.add(leaderboardPanel);
+        if (gameState == MENU) {
+            leaderboardPanel.setVisible(false);
+        }
 
     }
 
@@ -163,7 +181,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
 
     public void updateScore() {
         catchLabel.setText("");
-        releaseTime = System.currentTimeMillis();
+        releaseTime = System.currentTimeMillis() / 1000;
 
         // update player score
         dummyPlayer.score += (releaseTime - catchTime);
@@ -174,7 +192,7 @@ public class GameBoard extends JPanel implements MouseInputListener {
     }
 
     public void handleBallCatched() {
-        catchTime = System.currentTimeMillis();
+        catchTime = System.currentTimeMillis() / 1000;
         catchLabel.setText(dummyPlayer.username + " has grabbed the ball!");
         Dimension size = catchLabel.getPreferredSize();
         catchLabel.setBounds(650, 100, size.width, size.height);
