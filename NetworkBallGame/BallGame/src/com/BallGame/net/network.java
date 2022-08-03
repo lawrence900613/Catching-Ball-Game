@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class network {
     public static final int MAX_CLIENTS = 10; //Should not exceed 15. See encoding scheme.
-    public static final int SERVERID = 15;
+    public static final int SERVERID = 0;
     /**  
      * Encapsulement for return values of connectAsClient as a tuple of [Socket, Int].
      */
