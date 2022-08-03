@@ -1,52 +1,35 @@
 package com.BallGame.net;
-
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
 import java.util.concurrent.Callable;
 import java.lang.Exception;
 
-public class SocketListen implements Callable<Socket> {
-    ServerSocket listenSocket;
-    Boolean isCancelled = false;
-    Boolean stfu = false;
+public class SocketListen implements Callable<Socket>{
+    private ServerSocket listenSocket;
+    private Boolean stopped = false;
+    private Boolean silent = false;
 
-    /**
-     * The SocketListen class asynchronously waits for an incoming client connection
-     * when submitted to ExecutorService.
+    /** 
+     * Constructs a SocketListen instnace which asynchronously waits for an incoming client connection.
      * If a client connects, the accepting socket is returned for future use.
-     * If the executing thread is cancelled by invocation of cancel(), null is
-     * returned.
-     * No guarantees are made if the executing thread is cancelled otherwise.
-     * 
      * @param s ServerSocket to be listened on.
      */
-    protected SocketListen(ServerSocket s) {
-        listenSocket = s;
-    }
-
-    public void silence() {
-        stfu = true;
-    }
-
-    public void unsilence() {
-        stfu = false;
-    }
-
-    public void cancel() {
-        isCancelled = true;
-    }
+    protected SocketListen(ServerSocket s){ listenSocket = s; }
+    public void silence(){ silent = true; }
+    public void unsilence(){ silent = false; }
+    public void stop(){ stopped = true; }
 
     @Override
-    public Socket call() throws Exception {
+    public Socket call() throws Exception{
         Socket acceptingSocket;
-        while (!isCancelled) {
+        while(!stopped){
             try {
-                acceptingSocket = listenSocket.accept();
+                acceptingSocket = listenSocket.accept();    
             } catch (SocketTimeoutException e) {
                 continue;
             }
-            if (!stfu)
+            if(!silent)
                 System.out.println("Player connected.");
             return acceptingSocket;
         }
