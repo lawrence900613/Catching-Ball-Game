@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.util.List;
 import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
 
 public class ISListen implements Runnable {
     private List<Integer> pipe;
@@ -40,9 +41,10 @@ public class ISListen implements Runnable {
     public void run(){
         while(!stopped && !s.isInputShutdown()){
             try {
-                int p = is.read();
+                byte[] p = new byte[4];
+                is.read(p, 0, 4);
                 synchronized (pipe) {
-                    pipe.add(p);
+                    pipe.add(network.byteArrToInt(p));
                 }
             } catch (SocketTimeoutException e) {
                 continue;

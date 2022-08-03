@@ -1,15 +1,15 @@
-
 package com.BallGame.net;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ExecutorService;
 import java.util.ArrayList;
 
 public class network {
-    public static final int MAX_CLIENTS = 3; //Should not exceed 3. See encoding scheme.
-
+    public static final int MAX_CLIENTS = 10; //Should not exceed 15. See encoding scheme.
+    public static final int SERVERID = 15;
     /**  
      * Encapsulement for return values of connectAsClient as a tuple of [Socket, Int].
      */
@@ -57,7 +57,7 @@ public class network {
         for(int i = 0; i < MAX_CLIENTS; i++){
             if(SLT.get(i).isDone()){ //if connection acq'd, prep socket for return
                 csockets.add(SLT.get(i).get());
-                csockets.get(i).getOutputStream().write(i); //indicate uid to client
+                csockets.get(csockets.size() - 1).getOutputStream().write(i); //indicate uid to client
             }
             else //cancel thread
                 listeners[i].stop();
@@ -81,8 +81,8 @@ public class network {
 
     /* Preliminary encoding scheme
      * Left
-     * b    31-30   : UID
-     * b    29-26   : unused
+     * b    31-28   : UID
+     * b    27-26   : unused
      * b    25      : inform unlock
      * b    24      : inform lock
      * b    23-12   : x
@@ -94,11 +94,11 @@ public class network {
         return encode(arr[0], arr[1] == 1, arr[2] == 1, arr[3], arr[4]);
     }
     public static int encode(int UID, int unlock, int lock, int x, int y){
-        return encode(UID, unlock == 1, unlock == 1, x, y);
+        return encode(UID, unlock == 1, lock == 1, x, y);
     }
     /**
      * Encodes provided information as a 32-bit string wrapped as an integer.
-     * @param UID Bit 31-30. The UserID returned at connection.
+     * @param UID Bit 31-28. The UserID returned at connection.
      * @param unlock Bit 25. Indicates to recipients if ball is released.
      * @param lock Bit 24. Indicates to recipients if ball is held.
      * @param x Bit 23-12. Indicates current x position of the ball.
@@ -109,7 +109,7 @@ public class network {
     public static int encode(int UID, Boolean unlock, Boolean lock, int x, int y){
         
         int info = 0x00000000;
-        info |= (UID << 30);
+        info |= (UID << 28);
         //
         info |= (unlock ? 0x02000000 : 0);
         info |= (lock ? 0x01000000 : 0);
@@ -119,7 +119,7 @@ public class network {
     }
     /**
      * Decodes the 32-bit string into an integer array.
-     * 0: UID: Bit 31-30. The UserID returned when at connection.
+     * 0: UID: Bit 31-28. The UserID returned when at connection.
      * 1: unlock: Bit 25. Indicates to recipients if ball is released.
      * 2: lock: Bit 24. Indicates to recipients if ball is held.
      * 3: x: Bit 23-12. Indicates current x position of the ball.
@@ -130,11 +130,20 @@ public class network {
      */
     public static int[] decode(int info_en){
         int[] info = new int[5];
-        info[0] = (info_en & 0xC0000000) >>> 30;
+        info[0] = (info_en & 0xF0000000) >>> 28;
         info[1] = (info_en & 0x02000000) >>> 25;
         info[2] = (info_en & 0x01000000) >>> 24;
         info[3] = (info_en & 0x00FFF000) >>> 12;
         info[4] = (info_en & 0x00000FFF);
         return info;
+    }
+
+    public static byte[] intToByteArr(int n){
+        return ByteBuffer.allocate(4).putInt(n).array();
+    }
+
+    public static int byteArrToInt(byte[] bs){
+        return ByteBuffer.wrap(bs).getInt();
+        // return ((bs[0] & 0xFF) << 0) | ((bs[1] & 0xFF) << 8) | ((bs[2] & 0xFF) << 16) | ((bs[3] & 0xFF) << 24);
     }
 }
