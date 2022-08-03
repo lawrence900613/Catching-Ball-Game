@@ -57,7 +57,7 @@ public class network {
         for(int i = 0; i < MAX_CLIENTS; i++){
             if(SLT.get(i).isDone()){ //if connection acq'd, prep socket for return
                 csockets.add(SLT.get(i).get());
-                csockets.get(csockets.size() - 1).getOutputStream().write(i); //indicate uid to client
+                csockets.get(csockets.size() - 1).getOutputStream().write(i + 1); //indicate uid to client
             }
             else //cancel thread
                 listeners[i].stop();

@@ -45,6 +45,7 @@ public class ISListen implements Runnable {
                 is.read(p, 0, 4);
                 synchronized (pipe) {
                     pipe.add(byteArrToInt(p));
+
                 }
             } catch (SocketTimeoutException e) {
                 continue;
@@ -65,3 +66,4 @@ public class ISListen implements Runnable {
 
     }
 }
+
