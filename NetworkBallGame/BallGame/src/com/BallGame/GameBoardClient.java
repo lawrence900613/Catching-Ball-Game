@@ -54,6 +54,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     TestClient client = new TestClient();
 
+    boolean holdright = true; // it only change to false when the ball is holding by others 
     public GameBoardClient() {
         this.dummyPlayer = new Player("Dummy Player", Color.RED);
         Player janice = new Player("Janice", Color.BLUE);
@@ -74,7 +75,6 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         setPreferredSize(new Dimension(50 * 30, 50 * 20));
         setLayout(null);
         setBackground(Color.BLACK);
-
         Timer timer = new Timer(0, new ActionListener() {
             int i = 0;
             public void actionPerformed(ActionEvent e) {
@@ -94,9 +94,15 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                     // is.read(p, 0, 4);
                     // int[] message = network.decode(network.byteArrToInt(p));
                     //int color = temp[0]; //UID determines color 
+                    
                     ball.pos.x = temp[3];
                     ball.pos.y = temp[4];
                     ball.setcolor(temp[0]);
+                    if(temp[0] == 0 || temp[0] == client.getUID()){
+                        holdright = true;
+                    }else{
+                        holdright = false;
+                    }
                 } catch (Exception e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -220,7 +226,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        if (theCircle.contains(x, y)) {
+        if (theCircle.contains(x, y)&&holdright) {
             System.out.println("pressed x : " + ball.pos.x +" y :" + ball.pos.y);
             int msg = network.encode(client.getUID(), 0, 1, 4095, 4095);
             try {
@@ -240,7 +246,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (Draggingflag) {
+        if (Draggingflag&&holdright) {
             speedchangecount = 10;
             Random ran = new Random();
             int x = ran.nextInt(50 + 50) - 50;
@@ -282,7 +288,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
         int x, y;
         // if (theCircle.contains(e.getX(), e.getY())) {
-        if (Draggingflag) {
+        if (Draggingflag&&holdright) {
             if (e.getX() < 50) {
                 x = Math.max(e.getX(), 0 + ball.dim.x);
             } else {
