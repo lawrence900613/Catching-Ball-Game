@@ -301,7 +301,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                 y = Math.min(e.getY(), (50 * 20) - ball.dim.y);
             }
             startTime = System.nanoTime();
-            System.out.println("Dragging x : " + ball.pos.x +" y :" + ball.pos.y);
+            //System.out.println("Dragging x : " + ball.pos.x +" y :" + ball.pos.y);
                 
             int msg = network.encode(client.getUID(), 0, 1, x, y);
             try {

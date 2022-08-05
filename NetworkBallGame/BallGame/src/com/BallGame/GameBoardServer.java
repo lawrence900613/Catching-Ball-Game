@@ -23,6 +23,7 @@ import javax.swing.Timer;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -55,6 +56,11 @@ public class GameBoardServer extends JPanel{
     ArrayList<Socket> csockets = network.connectAsServer(3000);
     List<Integer> pipe = new ArrayList<Integer>();
     Handler Handle  = new Handler(csockets, pipe);
+
+    Timer timer;
+
+    long gamestarttime;
+    long elapsedTime;
     public GameBoardServer() throws Exception {         
         Handle.startListen();
 
@@ -67,8 +73,8 @@ public class GameBoardServer extends JPanel{
         setPreferredSize(new Dimension(50 * 30, 50 * 20));
         setLayout(null);
         setBackground(Color.BLACK);
-
-        Timer timer = new Timer(0, new ActionListener() {
+        gamestarttime = System.currentTimeMillis();
+        timer = new Timer(0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 while(!pipe.isEmpty()){
                     int temp = pipe.get(0);
@@ -103,6 +109,10 @@ public class GameBoardServer extends JPanel{
                 }
                 // it keep sending the ball posistion to every client
                 repaint();
+                elapsedTime = (new Date()).getTime() - gamestarttime; // how long since we start the game
+                if(elapsedTime >= 1*60*1000){ // if the game start over one minutes, stop the game
+                    timer.stop();
+                }
             }
 
         });
