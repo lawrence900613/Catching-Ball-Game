@@ -4,13 +4,13 @@ import java.awt.Color;
 
 public class Player {
 
-    String username;
-    Color teamname;
+    String teamname;
+    Color teamcolor;
     long score;
 
-    public Player(String username, Color teamname) {
-        this.username = username;
+    public Player(String teamname, Color teamcolor) {
         this.teamname = teamname;
+        this.teamcolor = teamcolor;
         this.score = 0;
     }
 
