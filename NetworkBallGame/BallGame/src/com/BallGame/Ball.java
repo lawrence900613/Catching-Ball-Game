@@ -71,9 +71,11 @@ public class Ball {
          case 9:
             color = Color.gray;
             break;
-         case 0:
-            color = Color.white;
+         case 10:
+            color = Color.darkGray;
             break;
+         default:
+            color = Color.white;
          }
    }
 }

@@ -90,7 +90,7 @@ public class GameBoardServer extends JPanel{
                     if((change[3] != 4095)){ // it is for mouse press, it shouldn't change the location
                         ball.pos.x = change[3];
                         ball.pos.y = change[4];
-                        System.out.println("Receive drag x : " + change[3] +" y :" + change[4]);
+                        //System.out.println("Receive drag x : " + change[3] +" y :" + change[4]);
                     }
                     /// it change the position(via dragging) and who is holding the ball
                 }

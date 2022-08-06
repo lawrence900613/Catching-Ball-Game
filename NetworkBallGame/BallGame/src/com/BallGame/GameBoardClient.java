@@ -227,7 +227,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         int x = e.getX();
         int y = e.getY();
         if (theCircle.contains(x, y)&&holdright) {
-            System.out.println("pressed x : " + ball.pos.x +" y :" + ball.pos.y);
+            //System.out.println("pressed x : " + ball.pos.x +" y :" + ball.pos.y);
             int msg = network.encode(client.getUID(), 0, 1, 4095, 4095);
             try {
                 client.sendMsg(msg);
@@ -253,7 +253,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             int y = ran.nextInt(50 + 50) - 50;
             int msg = network.encode(client.getUID(), 1, 0,ball.pos.x + x, ball.pos.y + y);
             try {
-                System.out.println("release x : " + ball.pos.x  +" y :" + ball.pos.y);
+                //System.out.println("release x : " + ball.pos.x  +" y :" + ball.pos.y);
                 client.sendMsg(msg);
 
             } catch (Exception e1) {
