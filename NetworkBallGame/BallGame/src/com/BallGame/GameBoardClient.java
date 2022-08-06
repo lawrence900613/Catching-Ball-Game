@@ -80,20 +80,8 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             public void actionPerformed(ActionEvent e) {
                 startTime = System.nanoTime();
                 lockCheck();
-                // if (speedchangecount == 0 && !Draggingflag) {
-                //     ball.spd.x = Integer.signum(ball.spd.x) * 5;
-                //     ball.spd.y = Integer.signum(ball.spd.y) * 5;
-                // } else {
-                //     speedchangecount--;
-                // }
-                //receive position coords to move from server
                 try {
                     int[] temp = client.listenForMsgs();
-                    // InputStream is = client.socket.getInputStream();
-                    // byte[] p = new byte[4];
-                    // is.read(p, 0, 4);
-                    // int[] message = network.decode(network.byteArrToInt(p));
-                    //int color = temp[0]; //UID determines color 
                     
                     ball.pos.x = temp[3];
                     ball.pos.y = temp[4];
@@ -217,9 +205,6 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // if (theCircle.contains(e.getX(), e.getY())) {
-        // handleBallCatched();
-        // }
     }
 
     @Override
