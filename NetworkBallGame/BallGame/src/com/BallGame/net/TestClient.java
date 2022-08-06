@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.BallGame.net.network.ClientResponse;
 
-public class TestClient extends Thread{
+public class TestClient extends Thread {
     public Socket socket;
     private int uid;
     private List<Socket> cSockets;
@@ -18,13 +18,13 @@ public class TestClient extends Thread{
     private OutputStream OutputStream;
     private InputStream InputStream;
 
-    public int getUID(){
+    public int getUID() {
         return this.uid;
     }
 
     public TestClient() {
         try {
-            ClientResponse clientResponse = network.connectAsClient("10.0.0.77", 3000);
+            ClientResponse clientResponse = network.connectAsClient("localhost", 3000);
             cSockets = new ArrayList<Socket>(1);
             System.out.println("connected");
             this.cSockets.add(this.socket);
@@ -34,14 +34,15 @@ public class TestClient extends Thread{
             this.InputStream = socket.getInputStream();
             System.out.println("my id: " + this.uid);
         } catch (Exception e) {
-            
+
             e.printStackTrace();
         }
     }
+
     /**
      * send msgs to client handler
      */
-    public void sendMsg(int msg) throws Exception{
+    public void sendMsg(int msg) throws Exception {
         try {
             OutputStream.write(network.intToByteArr(msg));
         } catch (IOException e) {

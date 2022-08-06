@@ -42,8 +42,8 @@ public class Ball {
       return this.pos.y;
    }
 
-   public void setcolor(int in){
-         switch(in) {
+   public void setcolor(int in) {
+      switch (in) {
          case 1:
             color = Color.blue;
             break;
@@ -76,6 +76,6 @@ public class Ball {
             break;
          default:
             color = Color.white;
-         }
+      }
    }
 }

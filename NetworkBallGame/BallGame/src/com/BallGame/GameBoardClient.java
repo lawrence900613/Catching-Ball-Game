@@ -31,6 +31,8 @@ import java.util.Random;
 import java.awt.Robot;
 import java.awt.AWTException;
 
+import java.util.Date;
+
 public class GameBoardClient extends JPanel implements MouseInputListener {
     Player dummyPlayer;
     ArrayList<Player> playerList = new ArrayList<>();
@@ -45,6 +47,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     int gameState = 1;
     static final int GAMEPLAY = 1;
+    static final int GAMEOVER = 2;
 
     Ball ball = new Ball();
 
@@ -52,9 +55,14 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     long estimatedTime;
 
+    Timer timer;
+    long elapsedTime;
+    long gamestarttime;
+
     TestClient client = new TestClient();
 
-    boolean holdright = true; // it only change to false when the ball is holding by others 
+    boolean holdright = true; // it only change to false when the ball is holding by others
+
     public GameBoardClient() {
         this.dummyPlayer = new Player("Dummy Player", Color.RED);
         Player janice = new Player("Janice", Color.BLUE);
@@ -69,26 +77,27 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         add(catchLabel);
 
         setUpLeaderboard();
+        gamestarttime = System.currentTimeMillis();
 
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         setPreferredSize(new Dimension(50 * 30, 50 * 20));
         setLayout(null);
         setBackground(Color.BLACK);
-        Timer timer = new Timer(0, new ActionListener() {
-            int i = 0;
+        timer = new Timer(0, new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 startTime = System.nanoTime();
                 lockCheck();
                 try {
                     int[] temp = client.listenForMsgs();
-                    
+
                     ball.pos.x = temp[3];
                     ball.pos.y = temp[4];
                     ball.setcolor(temp[0]);
-                    if(temp[0] == 0 || temp[0] == client.getUID()){
+                    if (temp[0] == 0 || temp[0] == client.getUID()) {
                         holdright = true;
-                    }else{
+                    } else {
                         holdright = false;
                     }
                 } catch (Exception e1) {
@@ -97,7 +106,11 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                 }
                 ball.wallDetection();
                 repaint();
-                i++;
+                elapsedTime = (new Date()).getTime() - gamestarttime; // how long since we start the game
+                if (elapsedTime >= 1 * 10 * 1000) { // if the game start over one minutes, stop the game
+                    timer.stop();
+                    gameState = GAMEOVER;
+                }
             }
 
         });
@@ -106,17 +119,22 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     Shape theCircle;
 
-    
-
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
         if (gameState == GAMEPLAY) {
-            Graphics2D g2d = (Graphics2D) g;
-            theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x, 2.0 * ball.dim.y);
-            
+            theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x,
+                    2.0 * ball.dim.y);
+            g2d.setColor(Color.white);
+            g2d.drawString("Time: " + (10 - elapsedTime / 1000), 50 * 30 / 2, 25);
             g2d.setColor(ball.color);
             g2d.fill(theCircle);
             g2d.draw(theCircle);
+        }
+        if (gameState == GAMEOVER) {
+            g2d.setColor(Color.WHITE);
+            g2d.drawString("Game Over", 50 * 30 / 2, 50 * 20 / 2);
         }
     }
 
@@ -211,40 +229,41 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        if (theCircle.contains(x, y)&&holdright) {
-            //System.out.println("pressed x : " + ball.pos.x +" y :" + ball.pos.y);
+        if (theCircle.contains(x, y) && holdright) {
+            // System.out.println("pressed x : " + ball.pos.x +" y :" + ball.pos.y);
             int msg = network.encode(client.getUID(), 0, 1, 4095, 4095);
             try {
                 client.sendMsg(msg);
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
-            //send msg to server saying ball grabbed and get lock + which colour grabbed
+            // send msg to server saying ball grabbed and get lock + which colour grabbed
             handleBallCatched();
             Draggingflag = true;
-            //ball.color = dummyPlayer.teamname;
+            // ball.color = dummyPlayer.teamname;
             ball.lockStart = System.currentTimeMillis();
             startTime = System.nanoTime();
-            estimatedTime = startTime + 1000000 * 10000; //s * ns
+            estimatedTime = startTime + 1000000 * 10000; // s * ns
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (Draggingflag&&holdright) {
+        if (Draggingflag && holdright) {
             speedchangecount = 10;
             Random ran = new Random();
             int x = ran.nextInt(50 + 50) - 50;
             int y = ran.nextInt(50 + 50) - 50;
-            int msg = network.encode(client.getUID(), 1, 0,ball.pos.x + x, ball.pos.y + y);
+            int msg = network.encode(client.getUID(), 1, 0, ball.pos.x + x, ball.pos.y + y);
             try {
-                //System.out.println("release x : " + ball.pos.x  +" y :" + ball.pos.y);
+                // System.out.println("release x : " + ball.pos.x +" y :" + ball.pos.y);
                 client.sendMsg(msg);
 
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
-            //send msg to server saying ball released and new speed + change colour to neutral 
+            // send msg to server saying ball released and new speed + change colour to
+            // neutral
             updateScore();
             Draggingflag = false;
             ball.lockStart = -ball.lockDuration;
@@ -266,14 +285,14 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
-    //int flag = 1;
+    // int flag = 1;
 
     @Override
     public void mouseDragged(MouseEvent e) {
 
         int x, y;
         // if (theCircle.contains(e.getX(), e.getY())) {
-        if (Draggingflag&&holdright) {
+        if (Draggingflag && holdright) {
             if (e.getX() < 50) {
                 x = Math.max(e.getX(), 0 + ball.dim.x);
             } else {
@@ -286,8 +305,8 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                 y = Math.min(e.getY(), (50 * 20) - ball.dim.y);
             }
             startTime = System.nanoTime();
-            //System.out.println("Dragging x : " + ball.pos.x +" y :" + ball.pos.y);
-                
+            // System.out.println("Dragging x : " + ball.pos.x +" y :" + ball.pos.y);
+
             int msg = network.encode(client.getUID(), 0, 1, x, y);
             try {
                 client.sendMsg(msg);
