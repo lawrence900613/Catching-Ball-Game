@@ -58,9 +58,9 @@ public class GameBoardServer extends JPanel{
     public GameBoardServer() throws Exception {         
         Handle.startListen();
 
-        this.dummyPlayer = new Player("RED", Color.RED);
-        Player janice = new Player("BLUE", Color.BLUE);
-        Player arthur = new Player("GREEN", Color.GREEN);
+        this.dummyPlayer = new Player(1);
+        Player janice = new Player(2);
+        Player arthur = new Player(3);
         catchLabel = new JLabel();
         catchLabel.setForeground(Color.white);
         add(catchLabel);

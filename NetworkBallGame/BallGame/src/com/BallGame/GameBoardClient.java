@@ -56,9 +56,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     boolean holdright = true; // it only change to false when the ball is holding by others 
     public GameBoardClient() {
-        this.dummyPlayer = new Player("RED", Color.RED);
-        Player janice = new Player("BLUE", Color.BLUE);
-        Player arthur = new Player("GREEN", Color.GREEN);
+        this.dummyPlayer = new Player(client.getUID());
+        Player janice = new Player(2);
+        Player arthur = new Player(3);
         janice.score = 1540;
         arthur.score = 250;
         playerList.add(dummyPlayer);
