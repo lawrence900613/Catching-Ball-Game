@@ -26,6 +26,7 @@ import com.BallGame.net.network;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Random;
 
 import java.awt.Robot;
@@ -33,7 +34,8 @@ import java.awt.AWTException;
 
 public class GameBoardClient extends JPanel implements MouseInputListener {
     Player player;
-    ArrayList<Player> playerList = new ArrayList<>();
+    HashMap<Integer, Player> playerList = new HashMap<Integer, Player>(); // tracks players and updates scores based on ID
+    ArrayList<Player> scoreList = new ArrayList<>(); // stores sorted scores
     long catchTime = 0;
     long releaseTime = 0;
     JLabel catchLabel; // pops up when a player grabs the ball
@@ -47,6 +49,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
     static final int GAMEPLAY = 1;
 
     Ball ball = new Ball();
+    int UIDholdball = 0;
 
     long startTime;
 
@@ -61,9 +64,10 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         Player arthur = new Player(3);
         janice.score = 1540;
         arthur.score = 250;
-        playerList.add(player);
-        playerList.add(janice);
-        playerList.add(arthur);
+        playerList.put(client.getUID(),player);
+        scoreList.add(player);
+        // playerList.add(janice);
+        // playerList.add(arthur);
         catchLabel = new JLabel();
         catchLabel.setForeground(Color.white);
         add(catchLabel);
@@ -94,7 +98,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                     // is.read(p, 0, 4);
                     // int[] message = network.decode(network.byteArrToInt(p));
                     //int color = temp[0]; //UID determines color 
-                    
+                    UIDholdball = temp[0];
                     ball.pos.x = temp[3];
                     ball.pos.y = temp[4];
                     ball.setcolor(temp[0]);
@@ -159,7 +163,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     public void renderScores() {
         scorePanel.removeAll();
-        for (Player player : playerList) {
+        for (Player player : scoreList) {
             JLabel scoreLabel = new JLabel(player.teamname + ": " + player.score);
             scoreLabel.setForeground(Color.white);
             scorePanel.add(scoreLabel);
@@ -172,7 +176,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     public void sortPlayers() {
         // sort scores from highest to lowest
-        Collections.sort(playerList, new Comparator<Player>() {
+        Collections.sort(scoreList, new Comparator<Player>() {
             @Override
             public int compare(Player p1, Player p2) {
                 if (p1.score == p2.score)
@@ -186,11 +190,21 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
     }
 
     public void updateScore() {
+        System.out.println("Player holding: " + UIDholdball);
         catchLabel.setText("");
         releaseTime = System.currentTimeMillis();
 
-        // update player score
-        player.score += (releaseTime - catchTime);
+        // if it's a new player, create a new player
+        if (!playerList.containsKey(UIDholdball)) {
+            System.out.println("new player");
+            Player newPlayer = new Player(UIDholdball);
+            playerList.put(UIDholdball, newPlayer);
+            scoreList.add(newPlayer);
+        }
+        // update player score based on uid
+        playerList.get(UIDholdball).score += (releaseTime - catchTime);
+
+        // player.score += (releaseTime - catchTime);
 
         // update leaderboard
         sortPlayers();
