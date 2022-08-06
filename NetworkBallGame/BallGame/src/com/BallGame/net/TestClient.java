@@ -24,7 +24,7 @@ public class TestClient extends Thread{
 
     public TestClient() {
         try {
-            ClientResponse clientResponse = network.connectAsClient("10.0.0.77", 3000);
+            ClientResponse clientResponse = network.connectAsClient("localhost", 3000);
             cSockets = new ArrayList<Socket>(1);
             System.out.println("connected");
             this.cSockets.add(this.socket);
