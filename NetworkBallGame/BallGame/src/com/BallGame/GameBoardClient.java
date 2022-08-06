@@ -34,10 +34,11 @@ import java.awt.AWTException;
 
 public class GameBoardClient extends JPanel implements MouseInputListener {
     Player player;
-    HashMap<Integer, Player> playerList = new HashMap<Integer, Player>(); // tracks players and updates scores based on ID
+    HashMap<Integer, Player> playerList = new HashMap<Integer, Player>(); // tracks players and updates scores based on
+                                                                          // ID
     ArrayList<Player> scoreList = new ArrayList<>(); // stores sorted scores
     long catchTime = 0;
-    long releaseTime = 0;
+    long releaseTime = 0; // score = catchTime - releaseTime
     JLabel catchLabel; // pops up when a player grabs the ball
     JPanel leaderboardPanel;
     JPanel scorePanel;
@@ -57,14 +58,15 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     TestClient client = new TestClient();
 
-    boolean holdright = true; // it only change to false when the ball is holding by others 
+    boolean holdright = true; // it only change to false when the ball is holding by others
+
     public GameBoardClient() {
         player = new Player(client.getUID());
-        Player janice = new Player(2);
-        Player arthur = new Player(3);
-        janice.score = 1540;
-        arthur.score = 250;
-        playerList.put(client.getUID(),player);
+        // Player janice = new Player(2);
+        // Player arthur = new Player(3);
+        // janice.score = 1540;
+        // arthur.score = 250;
+        playerList.put(client.getUID(), player);
         scoreList.add(player);
         // playerList.add(janice);
         // playerList.add(arthur);
@@ -81,30 +83,31 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         setBackground(Color.BLACK);
         Timer timer = new Timer(0, new ActionListener() {
             int i = 0;
+
             public void actionPerformed(ActionEvent e) {
                 startTime = System.nanoTime();
                 lockCheck();
                 // if (speedchangecount == 0 && !Draggingflag) {
-                //     ball.spd.x = Integer.signum(ball.spd.x) * 5;
-                //     ball.spd.y = Integer.signum(ball.spd.y) * 5;
+                // ball.spd.x = Integer.signum(ball.spd.x) * 5;
+                // ball.spd.y = Integer.signum(ball.spd.y) * 5;
                 // } else {
-                //     speedchangecount--;
+                // speedchangecount--;
                 // }
-                //receive position coords to move from server
+                // receive position coords to move from server
                 try {
                     int[] temp = client.listenForMsgs();
                     // InputStream is = client.socket.getInputStream();
                     // byte[] p = new byte[4];
                     // is.read(p, 0, 4);
                     // int[] message = network.decode(network.byteArrToInt(p));
-                    //int color = temp[0]; //UID determines color 
+                    // int color = temp[0]; //UID determines color
                     UIDholdball = temp[0];
                     ball.pos.x = temp[3];
                     ball.pos.y = temp[4];
                     ball.setcolor(temp[0]);
-                    if(temp[0] == 0 || temp[0] == client.getUID()){
+                    if (temp[0] == 0 || temp[0] == client.getUID()) {
                         holdright = true;
-                    }else{
+                    } else {
                         holdright = false;
                     }
                 } catch (Exception e1) {
@@ -122,14 +125,13 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     Shape theCircle;
 
-    
-
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (gameState == GAMEPLAY) {
             Graphics2D g2d = (Graphics2D) g;
-            theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x, 2.0 * ball.dim.y);
-            
+            theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x,
+                    2.0 * ball.dim.y);
+
             g2d.setColor(ball.color);
             g2d.fill(theCircle);
             g2d.draw(theCircle);
@@ -201,8 +203,11 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             playerList.put(UIDholdball, newPlayer);
             scoreList.add(newPlayer);
         }
-        // update player score based on uid
+        // update player score based on uid.
+        // skip if uid is the server's id
+        // if (UIDholdball != 0) {
         playerList.get(UIDholdball).score += (releaseTime - catchTime);
+        // }
 
         // player.score += (releaseTime - catchTime);
 
@@ -240,40 +245,41 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        if (theCircle.contains(x, y)&&holdright) {
-            System.out.println("pressed x : " + ball.pos.x +" y :" + ball.pos.y);
+        if (theCircle.contains(x, y) && holdright) {
+            System.out.println("pressed x : " + ball.pos.x + " y :" + ball.pos.y);
             int msg = network.encode(client.getUID(), 0, 1, 4095, 4095);
             try {
                 client.sendMsg(msg);
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
-            //send msg to server saying ball grabbed and get lock + which colour grabbed
+            // send msg to server saying ball grabbed and get lock + which colour grabbed
             handleBallCatched();
             Draggingflag = true;
-            //ball.color = player.teamcolor;
+            // ball.color = player.teamcolor;
             ball.lockStart = System.currentTimeMillis();
             startTime = System.nanoTime();
-            estimatedTime = startTime + 1000000 * 10000; //s * ns
+            estimatedTime = startTime + 1000000 * 10000; // s * ns
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (Draggingflag&&holdright) {
+        if (Draggingflag && holdright) {
             speedchangecount = 10;
             Random ran = new Random();
             int x = ran.nextInt(50 + 50) - 50;
             int y = ran.nextInt(50 + 50) - 50;
-            int msg = network.encode(client.getUID(), 1, 0,ball.pos.x + x, ball.pos.y + y);
+            int msg = network.encode(client.getUID(), 1, 0, ball.pos.x + x, ball.pos.y + y);
             try {
-                System.out.println("release x : " + ball.pos.x  +" y :" + ball.pos.y);
+                System.out.println("release x : " + ball.pos.x + " y :" + ball.pos.y);
                 client.sendMsg(msg);
 
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
-            //send msg to server saying ball released and new speed + change colour to neutral 
+            // send msg to server saying ball released and new speed + change colour to
+            // neutral
             updateScore();
             Draggingflag = false;
             ball.lockStart = -ball.lockDuration;
@@ -295,14 +301,14 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
-    //int flag = 1;
+    // int flag = 1;
 
     @Override
     public void mouseDragged(MouseEvent e) {
 
         int x, y;
         // if (theCircle.contains(e.getX(), e.getY())) {
-        if (Draggingflag&&holdright) {
+        if (Draggingflag && holdright) {
             if (e.getX() < 50) {
                 x = Math.max(e.getX(), 0 + ball.dim.x);
             } else {
@@ -315,8 +321,8 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                 y = Math.min(e.getY(), (50 * 20) - ball.dim.y);
             }
             startTime = System.nanoTime();
-            System.out.println("Dragging x : " + ball.pos.x +" y :" + ball.pos.y);
-                
+            System.out.println("Dragging x : " + ball.pos.x + " y :" + ball.pos.y);
+
             int msg = network.encode(client.getUID(), 0, 1, x, y);
             try {
                 client.sendMsg(msg);

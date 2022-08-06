@@ -15,7 +15,7 @@ public class Ball {
    public Ball() {
       this.pos = new Point((50 * 30) / 2, (50 * 20) / 2);
       this.dim = new Point(50, 50);
-      this.spd = new Point(5, 5);
+      this.spd = new Point(1, 1);
       this.color = Color.WHITE;
    }
 
@@ -42,8 +42,8 @@ public class Ball {
       return this.pos.y;
    }
 
-   public void setcolor(int in){
-         switch(in) {
+   public void setcolor(int in) {
+      switch (in) {
          case 1:
             color = Color.blue;
             break;
@@ -74,6 +74,6 @@ public class Ball {
          case 0:
             color = Color.white;
             break;
-         }
+      }
    }
 }
