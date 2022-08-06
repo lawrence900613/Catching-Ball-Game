@@ -93,6 +93,7 @@ public class GameBoardServer extends JPanel {
                         ball.pos.x = change[3]; // 4095 is the coord from mouse pressing and it shouldn't change the
                                                 // ball postition in that case
                         ball.pos.y = change[4];
+                        System.out.println("Receive drag x : " + change[3] +" y :" + change[4]);
                     }
                 }
                 if (!Draggingflag) { // if no one is dragging, ball move with constant speed

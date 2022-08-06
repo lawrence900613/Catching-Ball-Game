@@ -76,6 +76,7 @@ public class Ball {
             break;
          default:
             color = Color.white;
+            break;
       }
    }
 }
