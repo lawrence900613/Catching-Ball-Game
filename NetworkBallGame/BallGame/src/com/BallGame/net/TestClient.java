@@ -22,6 +22,9 @@ public class TestClient extends Thread {
         return this.uid;
     }
 
+    /*
+     * Client connects to server
+     */
     public TestClient() {
         try {
             ClientResponse clientResponse = network.connectAsClient("localhost", 3000);

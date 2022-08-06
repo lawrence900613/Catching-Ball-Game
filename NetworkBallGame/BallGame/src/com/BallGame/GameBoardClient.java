@@ -15,7 +15,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import java.io.InputStream;
 import java.awt.Graphics2D;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
@@ -44,25 +43,21 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     int speedchangecount = 0;
     boolean Draggingflag = false; // check whether circle is holding
-
     int gameState = 1;
     static final int GAMEPLAY = 1;
-    static final int GAMEOVER = 2;
-
     Ball ball = new Ball();
-
     long startTime;
-
     long estimatedTime;
-
-    Timer timer;
-    long elapsedTime;
-    long gamestarttime;
-
     TestClient client = new TestClient();
-
-    boolean holdright = true; // it only change to false when the ball is holding by others
-
+    boolean holdright = true; // it only change to false when the ball is holding by others 
+    
+    /*
+     *  Essentially listens to the server and updates the ball position based on the received message
+     *  All action will be constantly updated in the ActionListener(), 
+     *  lockcheck() forces player to drop the ball when the allocated time has execeded
+     *  holdright determines if a player can grab hold of the ball or not based on the message received
+     *  From there, basic condition checking such as window border detection and colour changing will be done
+     */
     public GameBoardClient() {
         this.dummyPlayer = new Player("Dummy Player", Color.RED);
         Player janice = new Player("Janice", Color.BLUE);
@@ -101,7 +96,6 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                         holdright = false;
                     }
                 } catch (Exception e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
                 ball.wallDetection();
@@ -119,6 +113,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     Shape theCircle;
 
+    /*
+     *  PaintComponent redraws the Ball object and fills Colour to the (assigned colour per user playing) or when ball is free to (White)
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
@@ -138,6 +135,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         }
     }
 
+    /*
+     * Initialize the scoreboard object on our game window
+     */
     public void setUpLeaderboard() {
         leaderboardPanel = new JPanel();
         leaderboardPanel.setBackground(Color.black);
@@ -163,6 +163,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
+    /*
+     * draws the scoreboard window
+     */
     public void renderScores() {
         scorePanel.removeAll();
         for (Player player : playerList) {
@@ -176,8 +179,10 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
+    /*
+     * display players from highest to lowest
+     */
     public void sortPlayers() {
-        // sort scores from highest to lowest
         Collections.sort(playerList, new Comparator<Player>() {
             @Override
             public int compare(Player p1, Player p2) {
@@ -191,18 +196,22 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         });
     }
 
+    /*
+     *  Update the score based on how long the user has grabbed on to the ball
+     */
     public void updateScore() {
         catchLabel.setText("");
         releaseTime = System.currentTimeMillis();
 
-        // update player score
         dummyPlayer.score += (releaseTime - catchTime);
 
-        // update leaderboard
         sortPlayers();
         renderScores();
     }
 
+    /*
+     *  handleBallCatched() displays a message on window saying which player has grabbed the ball
+     */
     public void handleBallCatched() {
         catchTime = System.currentTimeMillis();
         catchLabel.setText(dummyPlayer.username + " has grabbed the ball!");
@@ -210,6 +219,10 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         catchLabel.setBounds(650, 100, size.width, size.height);
     }
 
+    /*
+     * lockCheck() forces player to drop the ball when the allocated time has execeded
+     * This ensures that player cannot indefinitely hold on to the shared object
+     */
     public void lockCheck() {
         if (Draggingflag && (startTime > estimatedTime)) {
             try {
@@ -221,10 +234,18 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         }
     }
 
+    /*
+     * Starting here , these are the mouse listener functions from swing.event.MouseInputListener, 
+     * We use these to determine which player is currently holding on the ball and when they have released it.
+     * Therefore, whenever these actions are done, we will send a messsage to the server letting them know which client has grabbed the ball.
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
     }
 
+    /*
+     *  As soon as the mouse is pressed, the client will inform server of who the holder is and therefore locking the lock for other clients.
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
@@ -247,6 +268,10 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         }
     }
 
+    /*
+     * When user has released mouse, we let server know that the ball is free to be held again.
+     * Once ball is realeased, we also update the score based on how long the user has held on to the ball
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
         if (Draggingflag && holdright) {
@@ -285,8 +310,10 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
-    // int flag = 1;
-
+    /*
+     *  When mouse is dragged, we will constantly update the server on where the mouse is dragged on the client's window
+     *  Server will then propagate this message to every other client to mimic the movement on other's screen.
+     */
     @Override
     public void mouseDragged(MouseEvent e) {
 

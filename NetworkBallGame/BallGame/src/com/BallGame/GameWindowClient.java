@@ -2,11 +2,9 @@ package com.BallGame;
 
 import javax.swing.JFrame;
 
-// import com.BallGame.net.network;
-// import java.net.ServerSocket;
-// import java.net.Socket;
-// import java.util.ArrayList;
-
+/*
+ * Starts the game window for client 
+ */
 public class GameWindowClient {
 
     public static void initWindow() throws Exception {
