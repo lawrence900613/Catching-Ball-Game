@@ -15,7 +15,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import java.io.InputStream;
 import java.awt.Graphics2D;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
@@ -31,6 +30,8 @@ import java.util.Random;
 
 import java.awt.Robot;
 import java.awt.AWTException;
+
+import java.util.Date;
 
 public class GameBoardClient extends JPanel implements MouseInputListener {
     Player player;
@@ -48,7 +49,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     int gameState = 1;
     static final int GAMEPLAY = 1;
-
+    static final int GAMEOVER = 2;
     Ball ball = new Ball();
     int UIDholdball = 0;
 
@@ -56,10 +57,25 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     long estimatedTime;
 
+    Timer timer;
+    long elapsedTime;
+    long gamestarttime;
+
     TestClient client = new TestClient();
 
     boolean holdright = true; // it only change to false when the ball is holding by others
 
+    /*
+     * Essentially listens to the server and updates the ball position based on the
+     * received message
+     * All action will be constantly updated in the ActionListener(),
+     * lockcheck() forces player to drop the ball when the allocated time has
+     * execeded
+     * holdright determines if a player can grab hold of the ball or not based on
+     * the message received
+     * From there, basic condition checking such as window border detection and
+     * colour changing will be done
+     */
     public GameBoardClient() {
         player = new Player(client.getUID());
         // Player janice = new Player(2);
@@ -75,33 +91,22 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         add(catchLabel);
 
         setUpLeaderboard();
+        gamestarttime = System.currentTimeMillis();
 
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         setPreferredSize(new Dimension(50 * 30, 50 * 20));
         setLayout(null);
         setBackground(Color.BLACK);
-        Timer timer = new Timer(0, new ActionListener() {
-            int i = 0;
+        timer = new Timer(0, new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 startTime = System.nanoTime();
                 lockCheck();
-                // if (speedchangecount == 0 && !Draggingflag) {
-                // ball.spd.x = Integer.signum(ball.spd.x) * 5;
-                // ball.spd.y = Integer.signum(ball.spd.y) * 5;
-                // } else {
-                // speedchangecount--;
-                // }
-                // receive position coords to move from server
                 try {
                     int[] temp = client.listenForMsgs();
-                    // InputStream is = client.socket.getInputStream();
-                    // byte[] p = new byte[4];
-                    // is.read(p, 0, 4);
-                    // int[] message = network.decode(network.byteArrToInt(p));
-                    // int color = temp[0]; //UID determines color
                     UIDholdball = temp[0];
+
                     ball.pos.x = temp[3];
                     ball.pos.y = temp[4];
                     ball.setcolor(temp[0]);
@@ -111,12 +116,15 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                         holdright = false;
                     }
                 } catch (Exception e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
                 ball.wallDetection();
                 repaint();
-                i++;
+                elapsedTime = (new Date()).getTime() - gamestarttime; // how long since we start the game
+                if (elapsedTime >= 1 * 10 * 1000) { // if the game start over one minutes, stop the game
+                    timer.stop();
+                    gameState = GAMEOVER;
+                }
             }
 
         });
@@ -125,19 +133,32 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     Shape theCircle;
 
+    /*
+     * PaintComponent redraws the Ball object and fills Colour to the (assigned
+     * colour per user playing) or when ball is free to (White)
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
         if (gameState == GAMEPLAY) {
-            Graphics2D g2d = (Graphics2D) g;
             theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x,
                     2.0 * ball.dim.y);
-
+            g2d.setColor(Color.white);
+            g2d.drawString("Time: " + (10 - elapsedTime / 1000), 50 * 30 / 2, 25);
             g2d.setColor(ball.color);
             g2d.fill(theCircle);
             g2d.draw(theCircle);
         }
+        if (gameState == GAMEOVER) {
+            g2d.setColor(Color.WHITE);
+            g2d.drawString("Game Over", 50 * 30 / 2, 50 * 20 / 2);
+        }
     }
 
+    /*
+     * Initialize the scoreboard object on our game window
+     */
     public void setUpLeaderboard() {
         leaderboardPanel = new JPanel();
         leaderboardPanel.setBackground(Color.black);
@@ -163,6 +184,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
+    /*
+     * draws the scoreboard window
+     */
     public void renderScores() {
         scorePanel.removeAll();
         for (Player player : scoreList) {
@@ -176,6 +200,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
+    /*
+     * display players from highest to lowest
+     */
     public void sortPlayers() {
         // sort scores from highest to lowest
         Collections.sort(scoreList, new Comparator<Player>() {
@@ -191,6 +218,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         });
     }
 
+    /*
+     * Update the score based on how long the user has grabbed on to the ball
+     */
     public void updateScore() {
         System.out.println("Player holding: " + UIDholdball);
         catchLabel.setText("");
@@ -211,11 +241,14 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
         // player.score += (releaseTime - catchTime);
 
-        // update leaderboard
         sortPlayers();
         renderScores();
     }
 
+    /*
+     * handleBallCatched() displays a message on window saying which player has
+     * grabbed the ball
+     */
     public void handleBallCatched() {
         catchTime = System.currentTimeMillis();
         catchLabel.setText(player.teamname + " has grabbed the ball!");
@@ -223,6 +256,11 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         catchLabel.setBounds(650, 100, size.width, size.height);
     }
 
+    /*
+     * lockCheck() forces player to drop the ball when the allocated time has
+     * execeded
+     * This ensures that player cannot indefinitely hold on to the shared object
+     */
     public void lockCheck() {
         if (Draggingflag && (startTime > estimatedTime)) {
             try {
@@ -234,19 +272,28 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         }
     }
 
+    /*
+     * Starting here , these are the mouse listener functions from
+     * swing.event.MouseInputListener,
+     * We use these to determine which player is currently holding on the ball and
+     * when they have released it.
+     * Therefore, whenever these actions are done, we will send a messsage to the
+     * server letting them know which client has grabbed the ball.
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
-        // if (theCircle.contains(e.getX(), e.getY())) {
-        // handleBallCatched();
-        // }
     }
 
+    /*
+     * As soon as the mouse is pressed, the client will inform server of who the
+     * holder is and therefore locking the lock for other clients.
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
         if (theCircle.contains(x, y) && holdright) {
-            System.out.println("pressed x : " + ball.pos.x + " y :" + ball.pos.y);
+            // System.out.println("pressed x : " + ball.pos.x +" y :" + ball.pos.y);
             int msg = network.encode(client.getUID(), 0, 1, 4095, 4095);
             try {
                 client.sendMsg(msg);
@@ -263,6 +310,12 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         }
     }
 
+    /*
+     * When user has released mouse, we let server know that the ball is free to be
+     * held again.
+     * Once ball is realeased, we also update the score based on how long the user
+     * has held on to the ball
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
         if (Draggingflag && holdright) {
@@ -272,7 +325,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             int y = ran.nextInt(50 + 50) - 50;
             int msg = network.encode(client.getUID(), 1, 0, ball.pos.x + x, ball.pos.y + y);
             try {
-                System.out.println("release x : " + ball.pos.x + " y :" + ball.pos.y);
+                // System.out.println("release x : " + ball.pos.x +" y :" + ball.pos.y);
                 client.sendMsg(msg);
 
             } catch (Exception e1) {
@@ -301,8 +354,12 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     }
 
-    // int flag = 1;
-
+    /*
+     * When mouse is dragged, we will constantly update the server on where the
+     * mouse is dragged on the client's window
+     * Server will then propagate this message to every other client to mimic the
+     * movement on other's screen.
+     */
     @Override
     public void mouseDragged(MouseEvent e) {
 
@@ -321,7 +378,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                 y = Math.min(e.getY(), (50 * 20) - ball.dim.y);
             }
             startTime = System.nanoTime();
-            System.out.println("Dragging x : " + ball.pos.x + " y :" + ball.pos.y);
+            // System.out.println("Dragging x : " + ball.pos.x +" y :" + ball.pos.y);
 
             int msg = network.encode(client.getUID(), 0, 1, x, y);
             try {

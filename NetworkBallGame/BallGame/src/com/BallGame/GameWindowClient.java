@@ -2,10 +2,9 @@ package com.BallGame;
 
 import javax.swing.JFrame;
 
-import com.BallGame.net.network;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
+/*
+ * Starts the game window for client 
+ */
 public class GameWindowClient {
 
     public static void initWindow() throws Exception {
@@ -19,8 +18,8 @@ public class GameWindowClient {
         window.setFocusable(true);
         window.setVisible(true);
     }
-    
-    public static void main(String[] args) throws Exception {  
+
+    public static void main(String[] args) throws Exception {
         initWindow();
     }
 
