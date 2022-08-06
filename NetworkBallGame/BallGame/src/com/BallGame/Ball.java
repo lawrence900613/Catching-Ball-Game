@@ -15,7 +15,7 @@ public class Ball {
    public Ball() {
       this.pos = new Point((50 * 30) / 2, (50 * 20) / 2);
       this.dim = new Point(50, 50);
-      this.spd = new Point(1, 1);
+      this.spd = new Point(5, 5);
       this.color = Color.WHITE;
    }
 

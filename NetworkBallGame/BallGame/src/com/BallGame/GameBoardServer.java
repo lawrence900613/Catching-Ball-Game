@@ -93,7 +93,7 @@ public class GameBoardServer extends JPanel {
                         ball.pos.x = change[3]; // 4095 is the coord from mouse pressing and it shouldn't change the
                                                 // ball postition in that case
                         ball.pos.y = change[4];
-                        System.out.println("Receive drag x : " + change[3] +" y :" + change[4]);
+                        //System.out.println("Receive drag x : " + change[3] +" y :" + change[4]);
                     }
                 }
                 if (!Draggingflag) { // if no one is dragging, ball move with constant speed
@@ -109,12 +109,12 @@ public class GameBoardServer extends JPanel {
                                 network.encode(UIDholdball, !Draggingflag, Draggingflag, ball.getX(), ball.getY()))
                                 .array());
                     } catch (IOException x) {
-                        System.out.print(x);
+                        //System.out.print(x);
                     }
                 }
                 repaint();
                 elapsedTime = (new Date()).getTime() - gamestarttime; // how long since we start the game
-                if (elapsedTime >= 1 * 10 * 1000) { // if the game start over one minutes, stop the game
+                if (elapsedTime >= 1 * 60 * 1000) { // if the game start over one minutes, stop the game
                     timer.stop();
                     gameState = GAMEOVER;
                 }

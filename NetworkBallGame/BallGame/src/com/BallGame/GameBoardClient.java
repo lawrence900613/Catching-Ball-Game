@@ -15,8 +15,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import java.io.InputStream;
-import java.rmi.server.UID;
 import java.awt.Graphics2D;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
@@ -80,14 +78,8 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
      */
     public GameBoardClient() {
         player = new Player(client.getUID());
-        // Player janice = new Player(2);
-        // Player arthur = new Player(3);
-        // janice.score = 1540;
-        // arthur.score = 250;
         playerList.put(client.getUID(), player);
         scoreList.add(player);
-        // playerList.add(janice);
-        // playerList.add(arthur);
         catchLabel = new JLabel();
         catchLabel.setForeground(Color.white);
         add(catchLabel);
@@ -118,12 +110,12 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                         holdright = false;
                     }
                 } catch (Exception e1) {
-                    e1.printStackTrace();
+                    //e1.printStackTrace();
                 }
                 ball.wallDetection();
                 repaint();
                 elapsedTime = (new Date()).getTime() - gamestarttime; // how long since we start the game
-                if (elapsedTime >= 1 * 10 * 1000) { // if the game start over one minutes, stop the game
+                if (elapsedTime >= 1 * 60 * 1000) { // if the game start over one minutes, stop the game
                     timer.stop();
                     gameState = GAMEOVER;
                 }
@@ -147,7 +139,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             theCircle = new Ellipse2D.Double(ball.pos.x - ball.dim.x, ball.pos.y - ball.dim.y, 2.0 * ball.dim.x,
                     2.0 * ball.dim.y);
             g2d.setColor(Color.white);
-            g2d.drawString("Time: " + (10 - elapsedTime / 1000), 50 * 30 / 2, 25);
+            g2d.drawString("Time: " + (60 - elapsedTime / 1000), 50 * 30 / 2, 25);
             g2d.setColor(ball.color);
             g2d.fill(theCircle);
             g2d.draw(theCircle);
@@ -192,7 +184,6 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
     public void renderScores() {
         scorePanel.removeAll();
         for (Player player : scoreList) {
-            System.out.println("render score" + player.teamname + player.score);
             JLabel scoreLabel = new JLabel(player.teamname + ": " + player.score);
             scoreLabel.setForeground(Color.white);
             scorePanel.add(scoreLabel);
@@ -230,35 +221,18 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         if(UIDholdball != 0){
             System.out.println("Player holding: " + UIDholdball);
             catchLabel.setText("");
-            //releaseTime = System.currentTimeMillis();
             if (!playerList.containsKey(UIDholdball)) {
                 System.out.println("new player");
                 Player newPlayer = new Player(UIDholdball);
                 playerList.put(UIDholdball, newPlayer);
                 scoreList.add(newPlayer);
             }
-            // update player score based on uid.
-            // skip if uid is the server's id
-            // if (UIDholdball != 0) {
-            //playerList.get(UIDholdball).score += (releaseTime - catchTime);
             playerList.get(UIDholdball).score++;
-            // }
-
-        // player.score += (releaseTime - catchTime);
+        }
 
         sortPlayers();
         renderScores();
-    }
-
-    /*
-     * handleBallCatched() displays a message on window saying which player has
-     * grabbed the ball
-     */
-    public void handleBallCatched() {
-        catchTime = System.currentTimeMillis();
-        catchLabel.setText(player.teamname + " has grabbed the ball!");
-        Dimension size = catchLabel.getPreferredSize();
-        catchLabel.setBounds(650, 100, size.width, size.height);
+            
     }
 
     /*
@@ -306,10 +280,9 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             try {
                 client.sendMsg(msg);
             } catch (Exception e1) {
-                e1.printStackTrace();
+                //e1.printStackTrace();
             }
             // send msg to server saying ball grabbed and get lock + which colour grabbed
-            //handleBallCatched();
             Draggingflag = true;
             // ball.color = player.teamcolor;
             ball.lockStart = System.currentTimeMillis();
@@ -338,17 +311,13 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                 client.sendMsg(msg);
 
             } catch (Exception e1) {
-                e1.printStackTrace();
+                //e1.printStackTrace();
             }
             // send msg to server saying ball released and new speed + change colour to
             // neutral
-            //updateScore();
             Draggingflag = false;
             ball.lockStart = -ball.lockDuration;
             ball.color = Color.WHITE;
-        // } else if (theCircle.contains(e.getX(), e.getY())) {
-        //     updateScore();
-        // }
         }
     }
 
@@ -395,7 +364,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             try {
                 client.sendMsg(msg);
             } catch (Exception e1) {
-                e1.printStackTrace();
+                //e1.printStackTrace();
             }
 
         }
