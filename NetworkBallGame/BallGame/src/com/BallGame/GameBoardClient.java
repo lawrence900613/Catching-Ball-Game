@@ -100,15 +100,20 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
                 try {
                     int[] temp = client.listenForMsgs();
                     UIDholdball = temp[0];
-                    updateScore();
                     ball.pos.x = temp[3];
                     ball.pos.y = temp[4];
                     ball.setcolor(temp[0]);
-                    if (temp[0] == 0 || temp[0] == client.getUID()) {
+                    if(temp[0] == client.getUID()){
+                        holdright = true;
+                        updateScore();
+                    }else if (temp[0] == 0) {
                         holdright = true;
                     } else {
                         holdright = false;
+                        updateScore();
                     }
+
+
                 } catch (Exception e1) {
                     //e1.printStackTrace();
                 }

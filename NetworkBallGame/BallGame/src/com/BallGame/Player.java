@@ -53,7 +53,7 @@ public class Player {
            break;
          case 10:
            teamcolor = Color.darkGray;
-           teamname = "GRAY";
+           teamname = "DARK GRAY";
            break;
         case 0:
            teamcolor = Color.white;
