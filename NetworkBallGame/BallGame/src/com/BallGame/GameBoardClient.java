@@ -43,13 +43,22 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     int speedchangecount = 0;
     boolean Draggingflag = false; // check whether circle is holding
+
     int gameState = 1;
     static final int GAMEPLAY = 1;
+    static final int GAMEOVER = 2;
     Ball ball = new Ball();
     long startTime;
+
     long estimatedTime;
+
+    Timer timer;
+    long elapsedTime;
+    long gamestarttime;
+
     TestClient client = new TestClient();
-    boolean holdright = true; // it only change to false when the ball is holding by others 
+
+    boolean holdright = true; // it only change to false when the ball is holding by others
     
     /*
      *  Essentially listens to the server and updates the ball position based on the received message
