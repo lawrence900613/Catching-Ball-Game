@@ -32,7 +32,7 @@ import java.awt.Robot;
 import java.awt.AWTException;
 
 public class GameBoardClient extends JPanel implements MouseInputListener {
-    Player dummyPlayer;
+    Player player;
     ArrayList<Player> playerList = new ArrayList<>();
     long catchTime = 0;
     long releaseTime = 0;
@@ -56,12 +56,12 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     boolean holdright = true; // it only change to false when the ball is holding by others 
     public GameBoardClient() {
-        this.dummyPlayer = new Player(client.getUID());
+        player = new Player(client.getUID());
         Player janice = new Player(2);
         Player arthur = new Player(3);
         janice.score = 1540;
         arthur.score = 250;
-        playerList.add(dummyPlayer);
+        playerList.add(player);
         playerList.add(janice);
         playerList.add(arthur);
         catchLabel = new JLabel();
@@ -190,7 +190,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
         releaseTime = System.currentTimeMillis();
 
         // update player score
-        dummyPlayer.score += (releaseTime - catchTime);
+        player.score += (releaseTime - catchTime);
 
         // update leaderboard
         sortPlayers();
@@ -199,7 +199,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
 
     public void handleBallCatched() {
         catchTime = System.currentTimeMillis();
-        catchLabel.setText(dummyPlayer.teamname + " has grabbed the ball!");
+        catchLabel.setText(player.teamname + " has grabbed the ball!");
         Dimension size = catchLabel.getPreferredSize();
         catchLabel.setBounds(650, 100, size.width, size.height);
     }
@@ -237,7 +237,7 @@ public class GameBoardClient extends JPanel implements MouseInputListener {
             //send msg to server saying ball grabbed and get lock + which colour grabbed
             handleBallCatched();
             Draggingflag = true;
-            //ball.color = dummyPlayer.teamcolor;
+            //ball.color = player.teamcolor;
             ball.lockStart = System.currentTimeMillis();
             startTime = System.nanoTime();
             estimatedTime = startTime + 1000000 * 10000; //s * ns

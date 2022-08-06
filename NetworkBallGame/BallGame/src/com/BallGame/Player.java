@@ -9,8 +9,6 @@ public class Player {
     long score;
 
     public Player(int uid) {
-        // this.teamname = teamname;
-        // this.teamcolor = teamcolor;
         setcolor(uid);
         this.score = 0;
     }
