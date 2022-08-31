@@ -8,3 +8,6 @@ The Ball Game (“The game”) is started by running com.BallGame.GameWindowServ
 Once the game session starts, the server will asynchronously listen and broadcast the current game state to all clients using the acquired connection sockets during initialisation. To achieve asynchronous in-order message reading, each connected socket is listened to using an instance of the ISListen class (com.BallGame.net.ISListen). The Handler class (com.BallGame.net.Handler) then consolidates all read messages into a queue, of which the server-side game logic can then handle individually.
 
 This application was developed by Jun Pin Foo, Eric Chen, Shao-en Hung, Nhi Mai-Do, and Michael Chong Michael Chong. (Data Communications and Networking)
+
+# Documentation
+https://docs.google.com/document/d/1Wetpx5C8lUZhWn5OA60HblGx0C5d3aLgUaNHdq77tMQ/edit?usp=sharing
